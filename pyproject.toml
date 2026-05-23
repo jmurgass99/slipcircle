@@ -1,0 +1,74 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "slopestabilityjm"
+version = "1.2.0"
+description = "Slope stability analysis library (Bishop, Janbu, Spencer, Morgenstern-Price, pseudo-static)."
+readme = "README.md"
+authors = [{ name = "Jesus Murgas" }]
+requires-python = ">=3.10"
+license = { text = "MIT" }
+keywords = ["slope", "geotechnical", "stability", "LEM", "EC7", "EC8", "structural"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Topic :: Scientific/Engineering",
+]
+dependencies = ["numpy>=1.24",
+    "scipy>=1.10", "jmstructural-common"]
+
+[project.optional-dependencies]
+api  = ["fastapi>=0.100", "uvicorn[standard]>=0.20", "httpx>=0.25", "pydantic>=2.0"]
+test = ["pytest>=7.0", "pytest-cov>=4.0", "coverage>=7.0", "hypothesis>=6.0"]
+ui   = ["matplotlib>=3.7", "streamlit>=1.30"]
+
+[project.scripts]
+slopestabilityjm = "slopestabilityjm.__main__:main"
+
+[tool.setuptools.packages.find]
+include = ["slopestabilityjm*"]
+exclude = ["tests*", "examples*", "docs*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+markers = [
+    "unit: tests unitarios rapidos (<100ms)",
+    "integration: requieren stack completo o multiples modulos",
+    "slow: tests con duracion alta (>5s)",
+    "safety_critical: validados contra valores publicados (tol <= 2%)",
+    "property: property-based con hypothesis",
+    "api: requieren FastAPI / TestClient",
+]
+addopts = "--strict-markers"
+
+[tool.coverage.run]
+source = ["slopestabilityjm"]
+omit = [
+    "slopestabilityjm/_brand.py",
+    "slopestabilityjm/visualization.py",
+    "slopestabilityjm/__main__.py",
+    "tests/*",
+    "examples/*",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+    "if TYPE_CHECKING:",
+    "@abstractmethod",
+]
+fail_under = 75
+show_missing = true
+
+[tool.uv.sources]
+jmstructural-common = { workspace = true }
