@@ -69,7 +69,7 @@ def health() -> dict:
     return {"status": "ok", "version": __version__}
 
 
-@router.post("/api/slope/bishop")
+@router.post("/api/slope/bishop", summary="Factor de seguridad de taludes mediante método simplificado de Bishop (1955)")
 def api_bishop(payload: dict) -> dict:
     """Bishop simplificado para superficie circular dada."""
     try:
@@ -86,7 +86,7 @@ def api_bishop(payload: dict) -> dict:
         raise _wrap(exc)
 
 
-@router.post("/api/slope/janbu")
+@router.post("/api/slope/janbu", summary="Estabilidad de taludes por método riguroso de Janbu para superficies no circulares")
 def api_janbu(payload: dict) -> dict:
     """Janbu simplificado para superficie circular."""
     try:
@@ -101,7 +101,7 @@ def api_janbu(payload: dict) -> dict:
         raise _wrap(exc)
 
 
-@router.post("/api/slope/spencer")
+@router.post("/api/slope/spencer", summary="Factor de seguridad de taludes por método de Spencer (equilibrio completo)")
 def api_spencer(payload: dict) -> dict:
     """Spencer (force + moment equilibrium)."""
     try:
@@ -120,7 +120,7 @@ def api_spencer(payload: dict) -> dict:
         raise _wrap(exc)
 
 
-@router.post("/api/slope/critical_slip")
+@router.post("/api/slope/critical_slip", summary="Búsqueda de círculo crítico de deslizamiento mediante optimización")
 def api_critical_slip(payload: dict) -> dict:
     """Grid search Bishop para superficie critica."""
     try:
@@ -138,7 +138,7 @@ def api_critical_slip(payload: dict) -> dict:
         raise _wrap(exc)
 
 
-@router.post("/api/slope/seismic")
+@router.post("/api/slope/seismic", summary="Estabilidad pseudoestática de taludes bajo aceleración sísmica (Eurocódigo 7 / EC8)")
 def api_seismic(payload: dict) -> dict:
     """Pseudo-estatico EC8-5 + opcional Newmark."""
     try:
