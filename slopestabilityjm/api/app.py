@@ -64,7 +64,7 @@ def root() -> dict:
     }
 
 
-@router.get("/health")
+@router.get("/api/slope/health")
 def health() -> dict:
     return {"status": "ok", "version": __version__}
 

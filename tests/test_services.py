@@ -161,7 +161,7 @@ class TestRestAPI:
         assert any("bishop" in e for e in body["endpoints"])
 
     def test_health(self):
-        r = self.client.get("/health")
+        r = self.client.get("/api/slope/health")
         assert r.status_code == 200
         assert r.json()["status"] == "ok"
 
