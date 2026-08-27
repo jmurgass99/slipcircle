@@ -34,17 +34,27 @@ def evaluate_bray_travasarou(inp: BrayTravasarouInput) -> BrayTravasarouResult:
     if inp.k_y <= 0 or inp.Sa_1_5Ts_g <= 0:
         raise ValueError("k_y y Sa deben ser > 0")
 
-    # Coeficientes Tabla 4 (Bray-Travasarou 2007 J. Geotech. ASCE)
+    # Coeficientes Bray-Travasarou 2007 (J. Geotech. ASCE), Eq. (14.5).
+    # BUG CORREGIDO (campana de goldens 2026-08-26): la version anterior usaba
+    # SIEMPRE el intercepto -0.22 (que es el de la variante RIGIDA, Ts<0.05 s)
+    # combinado con el termino flexible +1.50*Ts — para Ts>=0.05 la ecuacion
+    # publicada usa -1.10, y la mezcla sobrepredecia el mediano x e^0.88=2.41
+    # (caso Austrian Dam: 82.4 cm frente a los 34.2 publicables). La variante
+    # rigida ademas no lleva el termino de Ts.
     ln_ky = log(inp.k_y)
     ln_Sa = log(inp.Sa_1_5Ts_g)
+    if inp.Ts_seconds < 0.05:
+        intercept, ts_term = -0.22, 0.0
+    else:
+        intercept, ts_term = -1.10, 1.50 * inp.Ts_seconds
     ln_D = (
-        -0.22
+        intercept
         - 2.83 * ln_ky
         - 0.333 * ln_ky ** 2
         + 0.566 * ln_ky * ln_Sa
         + 3.04 * ln_Sa
         - 0.244 * ln_Sa ** 2
-        + 1.50 * inp.Ts_seconds
+        + ts_term
         + 0.278 * (inp.Mw - 7)
     )
     D_median = float(__import__("math").exp(ln_D))  # cm

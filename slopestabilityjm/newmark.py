@@ -42,23 +42,31 @@ def evaluate_newmark(inp: NewmarkInput) -> NewmarkResult:
     a_y = inp.a_y_g * g  # m/s²
     accel = ag * g
 
-    # Integrar pulsos
+    # Integrar el bloque deslizante (convencion ladera-abajo, como
+    # seismic.newmark_integration — la implementacion gemela correcta).
+    # BUG CORREGIDO (campana de goldens 2026-08-26): la version anterior NO
+    # aplicaba la desaceleracion k_y*g cuando |a| <= a_y con v > 0 — el bloque
+    # "planeaba" a velocidad constante y el desplazamiento crecia LINEALMENTE
+    # con la cola en reposo del registro (pulso 0.5g/0.5s, ky=0.2: fisica
+    # 0.9197 m; el codigo daba 3.31 m con cola de 2 s y 6.25 m con 4 s).
     velocity = 0.0
     displacement = 0.0
     n_exc = 0
     in_pulse = False
     for a in accel:
-        if abs(a) > a_y:
-            # Aceleración relativa hacia abajo (signo convención: a > a_y desliza)
-            a_rel = (abs(a) - a_y) * np.sign(a)
-            velocity += a_rel * inp.dt_s
-            if not in_pulse:
-                in_pulse = True
-                n_exc += 1
-        if velocity > 0:
-            displacement += velocity * inp.dt_s
+        exc = a - a_y                       # excitacion relativa ladera-abajo
+        if velocity > 0.0 or exc > 0.0:
+            if exc > 0.0:
+                if not in_pulse:
+                    in_pulse = True
+                    n_exc += 1
+            else:
+                in_pulse = False
+            v_prev = velocity
+            velocity = max(0.0, velocity + exc * inp.dt_s)
+            displacement += 0.5 * (v_prev + velocity) * inp.dt_s
         else:
-            velocity = 0.0  # no se mueve hacia atrás
+            velocity = 0.0
             in_pulse = False
 
     # Arias intensity (m/s)
