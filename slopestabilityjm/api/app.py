@@ -12,7 +12,6 @@ except ImportError as exc:  # pragma: no cover
 
 from .._brand import NAME as _BRAND_NAME
 from .. import __version__
-from ..services import bishop, janbu, spencer, slip_search, seismic_slope
 from ..services._common import SlopeSpec, CircleSpec, SoilLayerSpec
 from ..exceptions import (
     SlopeError, GeometryError, GeotechError, CodeError, ConvergenceError,
@@ -60,6 +59,7 @@ def root() -> dict:
             "/api/slope/spencer",
             "/api/slope/critical_slip",
             "/api/slope/seismic",
+            "/api/slope/mononobe",
         ],
     }
 
@@ -72,6 +72,7 @@ def health() -> dict:
 @router.post("/api/slope/bishop", summary="Factor de seguridad de taludes mediante método simplificado de Bishop (1955)")
 def api_bishop(payload: dict) -> dict:
     """Bishop simplificado para superficie circular dada."""
+    from ..services import bishop
     try:
         inp = bishop.BishopInput(
             slope=_slope_from_dict(payload["slope"]),
@@ -89,6 +90,7 @@ def api_bishop(payload: dict) -> dict:
 @router.post("/api/slope/janbu", summary="Estabilidad de taludes por método riguroso de Janbu para superficies no circulares")
 def api_janbu(payload: dict) -> dict:
     """Janbu simplificado para superficie circular."""
+    from ..services import janbu
     try:
         inp = janbu.JanbuInput(
             slope=_slope_from_dict(payload["slope"]),
@@ -104,6 +106,7 @@ def api_janbu(payload: dict) -> dict:
 @router.post("/api/slope/spencer", summary="Factor de seguridad de taludes por método de Spencer (equilibrio completo)")
 def api_spencer(payload: dict) -> dict:
     """Spencer (force + moment equilibrium)."""
+    from ..services import spencer
     try:
         inp = spencer.SpencerInput(
             slope=_slope_from_dict(payload["slope"]),
@@ -123,6 +126,7 @@ def api_spencer(payload: dict) -> dict:
 @router.post("/api/slope/critical_slip", summary="Búsqueda de círculo crítico de deslizamiento mediante optimización")
 def api_critical_slip(payload: dict) -> dict:
     """Grid search Bishop para superficie critica."""
+    from ..services import slip_search
     try:
         inp = slip_search.SlipSearchInput(
             slope=_slope_from_dict(payload["slope"]),
@@ -141,6 +145,7 @@ def api_critical_slip(payload: dict) -> dict:
 @router.post("/api/slope/seismic", summary="Estabilidad pseudoestática de taludes bajo aceleración sísmica (Eurocódigo 7 / EC8)")
 def api_seismic(payload: dict) -> dict:
     """Pseudo-estatico EC8-5 + opcional Newmark."""
+    from ..services import seismic_slope
     try:
         inp = seismic_slope.SeismicSlopeInput(
             slope=_slope_from_dict(payload["slope"]),
@@ -151,6 +156,36 @@ def api_seismic(payload: dict) -> dict:
             ag_peak=payload.get("ag_peak"),
         )
         return seismic_slope.analyze(inp).__dict__
+    except Exception as exc:
+        raise _wrap(exc)
+
+
+@router.post("/api/slope/mononobe", summary="Análisis pseudoestático de cuña sísmica según Mononobe (1926)")
+def api_mononobe(payload: dict) -> dict:
+    """Evaluación pseudo-estática planar según Mononobe."""
+    from ..mononobe import MononobeInput, evaluate_mononobe
+    try:
+        m_inp = MononobeInput(
+            slope_height_m=float(payload["slope_height_m"]),
+            slope_angle_deg=float(payload["slope_angle_deg"]),
+            gamma_kN_m3=float(payload["gamma_kN_m3"]),
+            c_kPa=float(payload["c_kPa"]),
+            phi_deg=float(payload["phi_deg"]),
+            kh=float(payload.get("kh", 0.15)),
+            kv=float(payload.get("kv", 0.0)),
+        )
+        FS_min = float(payload.get("FS_min", 1.1))
+        res = evaluate_mononobe(m_inp, FS_min=FS_min)
+        return {
+            "FS_static": res.FS_static,
+            "FS_seismic": res.FS_seismic,
+            "psi_deg": res.psi_deg,
+            "is_safe": res.is_safe,
+            "FS_min": FS_min,
+            "code_reference": "Mononobe (1926) / Eurocode 8 Part 5",
+        }
+    except KeyError as exc:
+        raise HTTPException(400, f"falta parámetro {exc}")
     except Exception as exc:
         raise _wrap(exc)
 

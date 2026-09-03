@@ -21,16 +21,20 @@ class BrayTravasarouInput:
     Ts_seconds: float = 0.0          # período del talud (0 = rígido)
 
 
+VALIDATION_LEVEL = "experimental"
+
+
 @dataclass(frozen=True)
 class BrayTravasarouResult:
     median_displacement_cm: float
     sigma_lnD: float                 # σ ≈ 0.66
     P_D_gt_5cm: float                # probabilidad de superar 5 cm
     P_D_gt_30cm: float
+    validation_level: str = "experimental"
 
 
 def evaluate_bray_travasarou(inp: BrayTravasarouInput) -> BrayTravasarouResult:
-    """Modelo Bray-Travasarou 2007 (caso Ts > 0.05 s)."""
+    """[ESTADO: EXPERIMENTAL] Modelo predictivo semi-empírico Bray-Travasarou (2007) (caso Ts > 0.05 s)."""
     if inp.k_y <= 0 or inp.Sa_1_5Ts_g <= 0:
         raise ValueError("k_y y Sa deben ser > 0")
 
