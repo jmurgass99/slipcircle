@@ -35,7 +35,7 @@ def _circle_from_dict(d: dict) -> CircleSpec:
 
 def _wrap(exc: Exception) -> HTTPException:
     """Mapea excepciones tipadas a codigos HTTP."""
-    if isinstance(exc, (GeotechError, GeometryError, CodeError)):
+    if isinstance(exc, (GeotechError, GeometryError, CodeError, KeyError, TypeError, ValueError)):
         return HTTPException(422, str(exc))
     if isinstance(exc, ConvergenceError):
         return HTTPException(409, f"{exc} [iter={exc.iteration}, residual={exc.residual:.3e}]")
