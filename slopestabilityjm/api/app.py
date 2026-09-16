@@ -184,8 +184,6 @@ def api_mononobe(payload: dict) -> dict:
             "FS_min": FS_min,
             "code_reference": "Mononobe (1926) / Eurocode 8 Part 5",
         }
-    except KeyError as exc:
-        raise HTTPException(400, f"falta parámetro {exc}")
     except Exception as exc:
         raise _wrap(exc)
 
