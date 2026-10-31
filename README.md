@@ -51,7 +51,14 @@ Pseudo-estático con coeficientes sísmicos:
 
 ```python
 from slipcircle import PseudoStaticAnalysis
-PseudoStaticAnalysis(slope=slope, kh=0.10, kv=0.05, n_slices=40).factor_of_safety(surf)
+# (continúa del bloque anterior: `slope` y `surf` ya definidos)
+from math import tan, radians
+from slipcircle import Slope, SoilLayer, CircularSurface
+slope = Slope(profile=[(0.0, 0.0), (10 / tan(radians(30)), 10.0), (10 / tan(radians(30)) + 30.0, 10.0)],
+              layers=[SoilLayer(name="arena arcillosa", cohesion=10.0, friction_angle=20.0, unit_weight=18.0)],
+              layer_depths=[30.0])
+surf = CircularSurface(3.189, 16.909, 18.091)
+print(PseudoStaticAnalysis(slope=slope, kh=0.10, kv=0.05, n_slices=40).factor_of_safety(surf)["FS"])   # ≈ 0.96
 ```
 
 El script `examples/duncan_wright_homogeneous.py` ejecuta este caso completo con los cuatro métodos. Hay también una interfaz de línea de comandos (`slipcircle --help`).
