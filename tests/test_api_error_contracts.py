@@ -1,7 +1,7 @@
-"""Test de contrato HTTP 422 para errores de validación de payload en SlopeStabilityJm."""
+"""Test de contrato HTTP 422 para errores de validación de payload en SlipCircle."""
 import pytest
 from fastapi.testclient import TestClient
-from slopestabilityjm.api.app import app
+from slipcircle.api.app import app
 
 
 @pytest.fixture

@@ -13,7 +13,7 @@ from __future__ import annotations
 
 from fastapi.testclient import TestClient
 
-from slopestabilityjm.api.app import app
+from slipcircle.api.app import app
 
 client = TestClient(app)
 

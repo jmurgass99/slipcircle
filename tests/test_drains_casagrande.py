@@ -1,6 +1,6 @@
 """Tests para drenes Casagrande."""
 import pytest
-from slopestabilityjm.drains_casagrande import (
+from slipcircle.drains_casagrande import (
     DrainDesignInput, design_drains, time_to_drawdown_s,
 )
 

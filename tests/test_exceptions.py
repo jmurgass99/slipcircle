@@ -2,7 +2,7 @@
 from __future__ import annotations
 import pytest
 
-from slopestabilityjm.exceptions import (
+from slipcircle.exceptions import (
     SlopeError, GeotechError, ConvergenceError, CodeError,
     GeometryError, ConfigurationError, DependencyError,
 )
@@ -46,7 +46,7 @@ class TestBishopStrictMode:
     """Bishop en modo strict lanza ConvergenceError cuando max_iter se agota."""
 
     def test_strict_mode_raises_on_no_convergence(self, simple_slope, test_surface):
-        from slopestabilityjm.bishop import BishopAnalysis
+        from slipcircle.bishop import BishopAnalysis
         # max_iter=1 garantiza no convergencia
         ba = BishopAnalysis(simple_slope, n_slices=30, tol=1e-12,
                             max_iter=1, strict=True)
@@ -56,7 +56,7 @@ class TestBishopStrictMode:
         assert info.value.residual > 0
 
     def test_non_strict_returns_estimate(self, simple_slope, test_surface):
-        from slopestabilityjm.bishop import BishopAnalysis
+        from slipcircle.bishop import BishopAnalysis
         ba = BishopAnalysis(simple_slope, n_slices=30, tol=1e-12,
                             max_iter=1, strict=False)
         r = ba.factor_of_safety(test_surface)
@@ -68,7 +68,7 @@ class TestReExports:
     """Las excepciones se reexportan desde el paquete raiz."""
 
     def test_root_reexports(self):
-        import slopestabilityjm as ss
+        import slipcircle as ss
         assert ss.SlopeError is SlopeError
         assert ss.ConvergenceError is ConvergenceError
         assert ss.GeotechError is GeotechError

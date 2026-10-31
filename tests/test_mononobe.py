@@ -1,5 +1,5 @@
 """Tests Mononobe pseudo-estático."""
-from slopestabilityjm.mononobe import MononobeInput, evaluate_mononobe
+from slipcircle.mononobe import MononobeInput, evaluate_mononobe
 
 
 def test_FS_seismic_menor_static():

@@ -2,7 +2,7 @@
 import numpy as np
 import pytest
 
-from slopestabilityjm.newmark import NewmarkInput, evaluate_newmark
+from slipcircle.newmark import NewmarkInput, evaluate_newmark
 
 
 def test_acelerograma_bajo_no_desliza():

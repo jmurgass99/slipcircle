@@ -14,7 +14,7 @@ Run with:
 """
 from math import tan, radians
 
-from slopestabilityjm import (
+from slipcircle import (
     Slope, SoilLayer, CircularSurface,
     BishopAnalysis, JanbuAnalysis, SpencerAnalysis,
     MorgensternPriceAnalysis, CriticalSurfaceSearch,

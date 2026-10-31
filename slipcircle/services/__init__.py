@@ -1,4 +1,4 @@
-"""Service layer de SlopeStabilityJm.
+"""Service layer de SlipCircle.
 
 Funciones puras tipadas (dataclass Input + Result) que envuelven los
 metodos LEM (Bishop, Janbu, Spencer), busqueda de superficie critica y

@@ -1,7 +1,7 @@
 """Tests FS mínimos por código."""
 import pytest
 
-from slopestabilityjm.fs_by_code import fs_minimum, is_safe
+from slipcircle.fs_by_code import fs_minimum, is_safe
 
 
 def test_5_codes():

@@ -1,4 +1,4 @@
-"""FastAPI exponiendo los servicios de SlopeStabilityJm."""
+"""FastAPI exponiendo los servicios de SlipCircle."""
 from __future__ import annotations
 
 try:
@@ -7,7 +7,7 @@ try:
 except ImportError as exc:  # pragma: no cover
     from ..exceptions import DependencyError
     raise DependencyError(
-        "fastapi requerido: pip install slopestabilityjm[api]"
+        "fastapi requerido: pip install slipcircle[api]"
     ) from exc
 
 from .._brand import NAME as _BRAND_NAME

@@ -4,7 +4,7 @@ import math
 
 import pytest
 
-from slopestabilityjm.fellenius import Slice, fellenius_fs
+from slipcircle.fellenius import Slice, fellenius_fs
 
 
 def _slices():

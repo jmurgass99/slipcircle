@@ -1,13 +1,13 @@
-"""Puente desde FoundationDesignJm hacia SlopeStabilityJm.
+"""Puente desde FoundationDesignJm hacia SlipCircle.
 
 Convierte una secuencia de ``SoilLayerSpec`` (formato plano de
 FoundationDesignJm.services.bearing) en la lista de ``SoilLayer`` +
-``layer_depths`` que entiende ``slopestabilityjm.geometry.Slope``.
+``layer_depths`` que entiende ``slipcircle.geometry.Slope``.
 
 El objetivo es habilitar el flujo:
 
     FoundationDesignJm (perfil estratigrafico investigado para una
-    cimentacion) -> SlopeStabilityJm (estabilidad global del talud
+    cimentacion) -> SlipCircle (estabilidad global del talud
     sobre el que se asienta la cimentacion).
 
 Import de FoundationDesignJm es lazy: si no esta instalado se acepta
@@ -43,7 +43,7 @@ def layers_from_foundation_spec(
     Parameters
     ----------
     fd_layers : Sequence
-        Iterable de ``foundationdesignjm.services.bearing.SoilLayerSpec``
+        Iterable de ``foundationcalc.services.bearing.SoilLayerSpec``
         (o cualquier objeto con atributos compatibles via duck typing).
     name_prefix : str
         Prefijo para nombrar las capas resultantes (``FD_1``, ``FD_2``...).
@@ -112,19 +112,19 @@ def slope_from_foundation_spec(
 
 
 def try_import_fd_bearing() -> Any:
-    """Importa ``foundationdesignjm.services.bearing`` de forma diferida.
+    """Importa ``foundationcalc.services.bearing`` de forma diferida.
 
     Lanza ``DependencyError`` si el paquete no esta disponible.  Util cuando
     el caller quiere reutilizar el tipo ``SoilLayerSpec`` real (no solo via
     duck typing) y necesita una senal clara.
     """
     try:
-        from foundationdesignjm.services import bearing as _bearing  # type: ignore
+        from foundationcalc.services import bearing as _bearing  # type: ignore
         return _bearing
     except ImportError as exc:
         raise DependencyError(
-            "foundationdesignjm no esta instalado. "
-            "Instala con: pip install foundationdesignjm"
+            "foundationcalc no esta instalado. "
+            "Instala con: pip install foundationcalc"
         ) from exc
 
 

@@ -1,4 +1,4 @@
-"""Jerarquia de excepciones tipadas de SlopeStabilityJm.
+"""Jerarquia de excepciones tipadas de SlipCircle.
 
 Permite al caller (REST API, GUI, AI Copilot, scripts) diferenciar la
 naturaleza del fallo y reaccionar apropiadamente.
@@ -9,7 +9,7 @@ compatibilidad hacia atras con codigo que captura ``ValueError`` generico
 
 Ejemplo
 -------
->>> from slopestabilityjm.exceptions import GeotechError, ConvergenceError
+>>> from slipcircle.exceptions import GeotechError, ConvergenceError
 >>> try:
 ...     analysis.factor_of_safety(surface)
 ... except ConvergenceError as exc:
@@ -80,7 +80,7 @@ class DependencyError(SlopeError):
     """Falta un paquete opcional (fastapi, hypothesis, matplotlib, ...).
 
     El mensaje debe indicar el extra a instalar, e.g.
-    ``pip install slopestabilityjm[api]``.
+    ``pip install slipcircle[api]``.
     """
 
 

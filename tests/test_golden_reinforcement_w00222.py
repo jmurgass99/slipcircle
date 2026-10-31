@@ -38,10 +38,10 @@ from __future__ import annotations
 
 import pytest
 
-from slopestabilityjm.soil_profile import SoilLayer
-from slopestabilityjm.geometry import Slope, CircularSurface
-from slopestabilityjm.bishop import BishopAnalysis
-from slopestabilityjm.reinforcement import GeosyntheticLayer
+from slipcircle.soil_profile import SoilLayer
+from slipcircle.geometry import Slope, CircularSurface
+from slipcircle.bishop import BishopAnalysis
+from slipcircle.reinforcement import GeosyntheticLayer
 
 _C = 25.0
 _CX, _CY, _R = 15.0, 22.0, 24.0

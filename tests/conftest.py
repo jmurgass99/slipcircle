@@ -1,6 +1,6 @@
 """Configuracion compartida de pytest.
 
-- Asegura que el paquete ``slopestabilityjm`` sea importable cuando los
+- Asegura que el paquete ``slipcircle`` sea importable cuando los
   tests se ejecutan desde el directorio raiz sin instalacion editable.
 - Fixtures comunes (``simple_slope``, ``test_surface``) reutilizables.
 """
@@ -14,8 +14,8 @@ _ROOT = Path(__file__).resolve().parent.parent
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
-from slopestabilityjm.soil_profile import SoilLayer  # noqa: E402
-from slopestabilityjm.geometry import Slope, CircularSurface  # noqa: E402
+from slipcircle.soil_profile import SoilLayer  # noqa: E402
+from slipcircle.geometry import Slope, CircularSurface  # noqa: E402
 
 
 @pytest.fixture

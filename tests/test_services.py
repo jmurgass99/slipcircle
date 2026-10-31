@@ -2,11 +2,11 @@
 from __future__ import annotations
 import pytest
 
-from slopestabilityjm.services._common import (
+from slipcircle.services._common import (
     SoilLayerSpec, SlopeSpec, CircleSpec, build_slope, build_circle,
 )
-from slopestabilityjm.services import bishop, janbu, spencer, slip_search, seismic_slope
-from slopestabilityjm.exceptions import GeometryError, GeotechError, CodeError
+from slipcircle.services import bishop, janbu, spencer, slip_search, seismic_slope
+from slipcircle.exceptions import GeometryError, GeotechError, CodeError
 
 
 def _spec(c: float = 20.0, phi: float = 20.0,
@@ -102,7 +102,7 @@ class TestSeismicSlopeService:
 class TestIntegrationBridge:
 
     def test_layers_from_flat_objects(self):
-        from slopestabilityjm.integration.foundationdesignjm_bridge import (
+        from slipcircle.integration.foundationcalc_bridge import (
             layers_from_foundation_spec, _FlatLayer,
         )
         flats = [_FlatLayer(thickness=3.0, gamma=18.0, phi=25.0, c=5.0),
@@ -114,7 +114,7 @@ class TestIntegrationBridge:
         assert layers[1].cohesion == pytest.approx(60.0)
 
     def test_slope_from_foundation_spec(self):
-        from slopestabilityjm.integration.foundationdesignjm_bridge import (
+        from slipcircle.integration.foundationcalc_bridge import (
             slope_from_foundation_spec, _FlatLayer,
         )
         flats = [_FlatLayer(thickness=20.0, gamma=18.0, phi=20.0, c=20.0)]
@@ -122,21 +122,21 @@ class TestIntegrationBridge:
             flats, profile=[(0, 0), (20, 10), (30, 10)])
         assert slope.height == pytest.approx(10.0)
         # Sanity: el slope construido produce FS valido con Bishop
-        from slopestabilityjm.bishop import BishopAnalysis
-        from slopestabilityjm.geometry import CircularSurface
+        from slipcircle.bishop import BishopAnalysis
+        from slipcircle.geometry import CircularSurface
         r = BishopAnalysis(slope, n_slices=20).factor_of_safety(
             CircularSurface(15, 22, 24))
         assert r["FS"] > 0
 
     def test_empty_layers_raises(self):
-        from slopestabilityjm.integration.foundationdesignjm_bridge import (
+        from slipcircle.integration.foundationcalc_bridge import (
             layers_from_foundation_spec,
         )
         with pytest.raises(GeotechError):
             layers_from_foundation_spec([])
 
     def test_negative_thickness_raises(self):
-        from slopestabilityjm.integration.foundationdesignjm_bridge import (
+        from slipcircle.integration.foundationcalc_bridge import (
             layers_from_foundation_spec, _FlatLayer,
         )
         with pytest.raises(GeotechError):
@@ -150,7 +150,7 @@ class TestRestAPI:
     def setup_method(self):
         pytest.importorskip("fastapi")
         from fastapi.testclient import TestClient
-        from slopestabilityjm.api.app import app
+        from slipcircle.api.app import app
         self.client = TestClient(app)
 
     def test_root(self):

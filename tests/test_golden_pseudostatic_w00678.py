@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """Golden tests — cuña pseudo-estática (mononobe.py) anclada a W00678/W00704.
 
-OJO nomenclatura: ``slopestabilityjm/mononobe.py`` NO implementa el K_AE de
+OJO nomenclatura: ``slipcircle/mononobe.py`` NO implementa el K_AE de
 Mononobe-Okabe (empuje sísmico en muros) sino una CUÑA pseudo-estática de
 talud indefinido. Los goldens de K_AE de las fichas (K=0.446/0.471,
 Ed=154.7/137.5 kN/m) pertenecen a un futuro módulo seismic_foundation y NO
@@ -36,7 +36,7 @@ from math import atan, cos, degrees, radians, sin, tan
 
 import pytest
 
-from slopestabilityjm.mononobe import MononobeInput, evaluate_mononobe
+from slipcircle.mononobe import MononobeInput, evaluate_mononobe
 
 # Caso base: talud indefinido α=30°, H=5 m, γ=18 kN/m³, c=10 kPa, φ=30°
 _BASE = dict(slope_height_m=5.0, slope_angle_deg=30.0, gamma_kN_m3=18.0,

@@ -1,5 +1,5 @@
 """
-tests/test_slope_stability.py — Unit tests for SlopeStabilityJm.
+tests/test_slope_stability.py — Unit tests for SlipCircle.
 Validated against known Bishop method benchmarks (Duncan & Wright 2014).
 """
 import pytest
@@ -7,16 +7,16 @@ import sys
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from slopestabilityjm.soil_profile import SoilLayer
-from slopestabilityjm.geometry import Slope, CircularSurface
-from slopestabilityjm.bishop import BishopAnalysis
-from slopestabilityjm.janbu import JanbuAnalysis
-from slopestabilityjm.seismic import PseudoStaticAnalysis
-from slopestabilityjm.search import CriticalSurfaceSearch
-from slopestabilityjm.spencer import SpencerAnalysis
-from slopestabilityjm.morgenstern_price import MorgensternPriceAnalysis
-from slopestabilityjm.janbu_generalized import JanbuGeneralizedAnalysis
-from slopestabilityjm.reinforcement import GeosyntheticLayer
+from slipcircle.soil_profile import SoilLayer
+from slipcircle.geometry import Slope, CircularSurface
+from slipcircle.bishop import BishopAnalysis
+from slipcircle.janbu import JanbuAnalysis
+from slipcircle.seismic import PseudoStaticAnalysis
+from slipcircle.search import CriticalSurfaceSearch
+from slipcircle.spencer import SpencerAnalysis
+from slipcircle.morgenstern_price import MorgensternPriceAnalysis
+from slipcircle.janbu_generalized import JanbuGeneralizedAnalysis
+from slipcircle.reinforcement import GeosyntheticLayer
 
 
 # ---------------------------------------------------------------------------

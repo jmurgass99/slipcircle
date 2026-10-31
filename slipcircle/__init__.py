@@ -1,11 +1,11 @@
 """
-SlopeStabilityJm — Slope Stability Analysis Library
+SlipCircle — Slope Stability Analysis Library
 ====================================================
 Methods: Bishop, Janbu, Spencer, Morgenstern-Price, Pseudo-static seismic.
 
 Usage
 -----
->>> from slopestabilityjm import Slope, SoilLayer, BishopAnalysis
+>>> from slipcircle import Slope, SoilLayer, BishopAnalysis
 >>> slope = Slope(...)
 >>> result = BishopAnalysis(slope).factor_of_safety()
 """

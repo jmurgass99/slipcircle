@@ -3,15 +3,17 @@ requires = ["setuptools>=68", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "slopestabilityjm"
+name = "slipcircle"
 version = "1.2.0"
-description = "Slope stability analysis library (Bishop, Janbu, Spencer, Morgenstern-Price, pseudo-static)."
+description = "Slope stability by limit equilibrium: Bishop, Janbu, Spencer, Morgenstern-Price, critical surface search, pseudo-static seismic and reinforcement."
 readme = "README.md"
-authors = [{ name = "Jesus Murgas" }]
+authors = [{ name = "Jesús Murgas" }]
 requires-python = ">=3.10"
 license = { text = "MIT" }
-keywords = ["slope", "geotechnical", "stability", "LEM", "EC7", "EC8", "structural"]
+keywords = ["slope-stability", "geotechnical", "limit-equilibrium", "bishop", "spencer", "morgenstern-price", "EC7", "EC8", "newmark"]
 classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Science/Research",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
@@ -21,19 +23,23 @@ classifiers = [
     "Operating System :: OS Independent",
     "Topic :: Scientific/Engineering",
 ]
-dependencies = ["numpy>=1.24",
-    "scipy>=1.10", "jmstructural-common"]
+dependencies = ["numpy>=1.24", "scipy>=1.10"]
 
 [project.optional-dependencies]
 api  = ["fastapi>=0.100", "uvicorn[standard]>=0.20", "httpx>=0.25", "pydantic>=2.0"]
-test = ["pytest>=7.0", "pytest-cov>=4.0", "coverage>=7.0", "hypothesis>=6.0"]
+test = ["pytest>=7.0", "pytest-cov>=4.0", "pytest-timeout>=2.1", "coverage>=7.0", "hypothesis>=6.0"]
 ui   = ["matplotlib>=3.7", "streamlit>=1.30"]
 
 [project.scripts]
-slopestabilityjm = "slopestabilityjm.__main__:main"
+slipcircle = "slipcircle.__main__:main"
+
+[project.urls]
+Homepage = "https://github.com/jmurgass99/slipcircle"
+Repository = "https://github.com/jmurgass99/slipcircle"
+Issues = "https://github.com/jmurgass99/slipcircle/issues"
 
 [tool.setuptools.packages.find]
-include = ["slopestabilityjm*"]
+include = ["slipcircle*"]
 exclude = ["tests*", "examples*", "docs*"]
 
 [tool.pytest.ini_options]
@@ -50,11 +56,11 @@ markers = [
 addopts = "--strict-markers"
 
 [tool.coverage.run]
-source = ["slopestabilityjm"]
+source = ["slipcircle"]
 omit = [
-    "slopestabilityjm/_brand.py",
-    "slopestabilityjm/visualization.py",
-    "slopestabilityjm/__main__.py",
+    "slipcircle/_brand.py",
+    "slipcircle/visualization.py",
+    "slipcircle/__main__.py",
     "tests/*",
     "examples/*",
 ]
@@ -69,6 +75,3 @@ exclude_lines = [
 ]
 fail_under = 75
 show_missing = true
-
-[tool.uv.sources]
-jmstructural-common = { workspace = true }

@@ -13,22 +13,22 @@ import math
 import numpy as np
 import pytest
 
-from slopestabilityjm.geometry import Slope, CircularSurface
-from slopestabilityjm.soil_profile import SoilLayer
-from slopestabilityjm.bishop import BishopAnalysis
-from slopestabilityjm.janbu import JanbuAnalysis
-from slopestabilityjm.spencer import SpencerAnalysis
-from slopestabilityjm.morgenstern_price import (
+from slipcircle.geometry import Slope, CircularSurface
+from slipcircle.soil_profile import SoilLayer
+from slipcircle.bishop import BishopAnalysis
+from slipcircle.janbu import JanbuAnalysis
+from slipcircle.spencer import SpencerAnalysis
+from slipcircle.morgenstern_price import (
     MorgensternPriceAnalysis,
     half_sine,
     constant_f,
     trapezoidal,
 )
-from slopestabilityjm.seismic import PseudoStaticAnalysis
-from slopestabilityjm.water import HorizontalWaterTable, PiezometricLine, RuModel
-from slopestabilityjm.reinforcement import GeosyntheticLayer, SoilNail, reinforcement_moment
-from slopestabilityjm.slices import slices_from_circle, slices_from_polyline
-from slopestabilityjm.newmark import NewmarkInput, evaluate_newmark
+from slipcircle.seismic import PseudoStaticAnalysis
+from slipcircle.water import HorizontalWaterTable, PiezometricLine, RuModel
+from slipcircle.reinforcement import GeosyntheticLayer, SoilNail, reinforcement_moment
+from slipcircle.slices import slices_from_circle, slices_from_polyline
+from slipcircle.newmark import NewmarkInput, evaluate_newmark
 
 
 # ============================================================================

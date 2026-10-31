@@ -69,10 +69,10 @@ import math
 
 import pytest
 
-from slopestabilityjm.fellenius import Slice, fellenius_fs
-from slopestabilityjm.geometry import Slope
-from slopestabilityjm.slices import slices_from_polyline
-from slopestabilityjm.soil_profile import SoilLayer
+from slipcircle.fellenius import Slice, fellenius_fs
+from slipcircle.geometry import Slope
+from slipcircle.slices import slices_from_polyline
+from slipcircle.soil_profile import SoilLayer
 
 _BETA_DEG = 15.0
 _PHI_DEG = 30.0

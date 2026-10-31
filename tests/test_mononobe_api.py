@@ -6,8 +6,8 @@ import math
 import pytest
 from fastapi.testclient import TestClient
 
-from slopestabilityjm.api.app import app
-from slopestabilityjm.mononobe import MononobeInput, evaluate_mononobe
+from slipcircle.api.app import app
+from slipcircle.mononobe import MononobeInput, evaluate_mononobe
 
 
 @pytest.fixture

@@ -16,7 +16,7 @@ from .geometry import Slope, CircularSurface
 from .reinforcement import GeosyntheticLayer, SoilNail, reinforcement_moment
 from .exceptions import ConvergenceError
 
-_LOG = logging.getLogger("slopestabilityjm.bishop")
+_LOG = logging.getLogger("slipcircle.bishop")
 
 
 @dataclass

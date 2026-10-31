@@ -29,7 +29,7 @@ import math
 
 import pytest
 
-from slopestabilityjm.bray_travasarou import (
+from slipcircle.bray_travasarou import (
     BrayTravasarouInput,
     evaluate_bray_travasarou,
 )

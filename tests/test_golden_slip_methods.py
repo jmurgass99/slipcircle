@@ -43,10 +43,10 @@ from math import asin, cos, degrees
 
 import pytest
 
-from slopestabilityjm.soil_profile import SoilLayer
-from slopestabilityjm.geometry import Slope, CircularSurface
-from slopestabilityjm.bishop import BishopAnalysis
-from slopestabilityjm.fellenius import Slice, fellenius_fs
+from slipcircle.soil_profile import SoilLayer
+from slipcircle.geometry import Slope, CircularSurface
+from slipcircle.bishop import BishopAnalysis
+from slipcircle.fellenius import Slice, fellenius_fs
 
 
 # --- Caso φ'=0 con geometría/parámetros conocidos -------------------------

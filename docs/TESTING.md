@@ -1,10 +1,10 @@
-# Testing — SlopeStabilityJm
+# Testing — SlipCircle
 
 ## Layout
 
 - `tests/test_slope_stability.py` — unit tests historicos (Bishop, Janbu, Spencer, MP, seismic, search, refuerzos).
 - `tests/test_exceptions.py` — jerarquia tipada `SlopeError → GeotechError | ConvergenceError | CodeError | GeometryError | ConfigurationError | DependencyError` y modo `strict=True` en Bishop.
-- `tests/test_services.py` — service layer (`slopestabilityjm.services.*`), puente FoundationDesignJm y REST API (FastAPI TestClient).
+- `tests/test_services.py` — service layer (`slipcircle.services.*`), puente FoundationDesignJm y REST API (FastAPI TestClient).
 - `tests/test_property_invariants.py` — invariantes fisicos verificados con [hypothesis](https://hypothesis.readthedocs.io/) (FS positivo, monotonia en c'/phi'/kh, FS sismico <= FS estatico, Bishop ~ Janbu).
 - `tests/conftest.py` — fixtures `simple_slope` y `test_surface`.
 
@@ -35,14 +35,14 @@ python -m pytest tests/ -m property -q
 ## Gate de cobertura
 
 `pyproject.toml` declara `[tool.coverage.report] fail_under = 75`. El script
-`run_coverage.ps1` ejecuta `pytest --cov=slopestabilityjm`; si la cobertura
+`run_coverage.ps1` ejecuta `pytest --cov=slipcircle`; si la cobertura
 total cae por debajo del 75% el comando termina con exit code != 0.
 
 Modulos omitidos del calculo (declarados en `[tool.coverage.run] omit`):
 
-- `slopestabilityjm/_brand.py` — constantes
-- `slopestabilityjm/visualization.py` — matplotlib (UI-only)
-- `slopestabilityjm/__main__.py` — CLI
+- `slipcircle/_brand.py` — constantes
+- `slipcircle/visualization.py` — matplotlib (UI-only)
+- `slipcircle/__main__.py` — CLI
 
 ## Extras opcionales
 

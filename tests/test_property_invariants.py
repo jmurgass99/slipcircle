@@ -15,11 +15,11 @@ import pytest
 hypothesis = pytest.importorskip("hypothesis")
 from hypothesis import given, settings, strategies as st, HealthCheck
 
-from slopestabilityjm.geometry import Slope, CircularSurface
-from slopestabilityjm.soil_profile import SoilLayer
-from slopestabilityjm.bishop import BishopAnalysis
-from slopestabilityjm.janbu import JanbuAnalysis
-from slopestabilityjm.seismic import PseudoStaticAnalysis
+from slipcircle.geometry import Slope, CircularSurface
+from slipcircle.soil_profile import SoilLayer
+from slipcircle.bishop import BishopAnalysis
+from slipcircle.janbu import JanbuAnalysis
+from slipcircle.seismic import PseudoStaticAnalysis
 
 
 def _slope(c: float, phi: float, gamma: float = 18.0,

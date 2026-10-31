@@ -3,7 +3,7 @@
 
 Procedencia (split honesto WorkID <-> número):
 - **Método**: Newmark, N.M. (1965) "Effects of earthquakes on dams and
-  embankments" (referencia citada en ``slopestabilityjm/newmark.py`` y
+  embankments" (referencia citada en ``slipcircle/newmark.py`` y
   descrita como "Newmark rigid sliding block procedure" en Bray, J.D. (2007)
   *Simplified seismic slope displacement procedures*, cap. 14, §4.4).
 - **Fichas del corpus**: NO existe ficha con ejemplo resuelto del bloque
@@ -34,8 +34,8 @@ import math
 import numpy as np
 import pytest
 
-from slopestabilityjm.newmark import NewmarkInput, evaluate_newmark
-from slopestabilityjm.seismic import PseudoStaticAnalysis
+from slipcircle.newmark import NewmarkInput, evaluate_newmark
+from slipcircle.seismic import PseudoStaticAnalysis
 
 # Pulso rectangular de referencia
 _A = 0.5      # amplitud del pulso [g]
