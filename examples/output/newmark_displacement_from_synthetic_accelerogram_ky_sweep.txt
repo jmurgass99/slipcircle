@@ -1,0 +1,11 @@
+Registro: 2000 puntos, PGA = 0.350 g, Δt = 0.01 s
+
+ k_y [g]   D [cm]  pulsos  I_a [m/s]  severidad
+    0.05    38.87      55      2.855  high
+    0.10    13.93      34      2.855  high
+    0.15     5.29      19      2.855  medium
+    0.20     2.00       9      2.855  medium
+    0.25     0.74       3      2.855  low
+    0.30     0.15       2      2.855  low
+
+Solo cuentan los pulsos de signo ladera abajo que superan k_y; por encima de la PGA no hay deslizamiento.

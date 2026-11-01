@@ -1,0 +1,9 @@
+ dovelas  FS Bishop  iteraciones
+      10     1.2444            7
+      20     1.2651            7
+      40     1.2501            7
+      80     1.2570            7
+     160     1.2570            7
+     320     1.2551            7
+
+Fellenius (160 dovelas) = 1.1732 ≤ Bishop = 1.2570: True (diferencia +7.1%)

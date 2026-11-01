@@ -1,0 +1,9 @@
+M_refuerzo geomalla               =    952.7 kN·m/m
+M_refuerzo 2 bulones              =   1775.6 kN·m/m
+M_refuerzo geomalla + 2 bulones   =   2728.3 kN·m/m
+
+método                   FS sin   FS con     ΔFS
+Bishop Simplified        1.2501   1.5261 +0.2760
+Janbu Simplified         1.0088   1.4098 +0.4010
+Spencer                  1.2454   1.4908 +0.2454
+Morgenstern-Price        1.2400   1.4854 +0.2454

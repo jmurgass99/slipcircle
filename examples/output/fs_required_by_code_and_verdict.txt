@@ -1,0 +1,14 @@
+FS estático (Bishop) = 1.250;  FS pseudo-estático (k_h = 0,10, k_v = 0,05) = 0.956
+
+código escenario           FS mín  FS calc  veredicto
+EU     static_persistent     1.00    1.250  cumple
+EU     seismic               1.00    0.956  NO cumple
+SG     static_persistent     1.00    1.250  cumple
+US     static_persistent     1.50    1.250  NO cumple
+US     seismic               1.10    0.956  NO cumple
+CO     static_persistent     1.50    1.250  NO cumple
+CO     seismic               1.05    0.956  NO cumple
+AU     static_persistent     1.50    1.250  NO cumple
+AU     seismic               1.10    0.956  NO cumple
+
+Escenario no tabulado → ValueError: sin FS_min para ('EU', 'accidental')

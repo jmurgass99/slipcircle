@@ -1,0 +1,12 @@
+=== Critical surface search (Bishop) ===
+  Critical FS = 1.2534
+  Critical circle: cx=3.189  cy=16.909  R=18.091
+
+=== Compare methods on the critical circle ===
+  Bishop Simplified               FS = 1.2501
+  Janbu Simplified                FS = 1.0088
+  Spencer                         FS = 1.2454
+  Morgenstern-Price               FS = 1.24
+
+=== Pseudo-static (kh = 0.10) ===
+   {'method': 'Pseudo-static (Bishop modified)', 'FS': np.float64(0.956), 'kh': 0.1, 'kv': 0.05, 'n_slices': 37, 'iterations': 8}

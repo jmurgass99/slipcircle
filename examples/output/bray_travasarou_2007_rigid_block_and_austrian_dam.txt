@@ -1,0 +1,6 @@
+caso                              D mediano  P(D>5cm)  P(D>30cm)  referencia
+bloque rígido (T_s = 0)              15.4 cm     0.956      0.156  15,4 cm
+Austrian Dam, Loma Prieta 1989       34.2 cm     0.998      0.579  34,2 cm (observado 20–70 cm)
+mismo talud con k_y = 0,25           12.4 cm     0.916      0.090  —
+
+σ_lnD = 0.66; nivel de validación declarado por el módulo: experimental

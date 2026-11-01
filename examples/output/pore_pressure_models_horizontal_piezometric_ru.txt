@@ -1,0 +1,8 @@
+Círculo crítico en seco: centro (-0.455, 24.0), R = 25.0
+
+seco                                           u_máx =    0.0 kPa  FS Fellenius = 1.5360
+freático horizontal y_w = 3 m                  u_máx =   39.2 kPa  FS Fellenius = 1.1828
+línea piezométrica (0, 1) → (20, 6) → (40, 8)  u_máx =   26.1 kPa  FS Fellenius = 1.1813
+r_u = 0,25 (u = r_u·γ·h por dovela)            u_máx =   17.7 kPa  FS Fellenius = 1.2156
+
+Bishop con Slope.water_table_y = 3 m: FS = 1.1693 (seco: 1.5853)

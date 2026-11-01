@@ -1,0 +1,6 @@
+ k [m/s]  Q/dren [l/min]  n drenes  Q total [m³/día]  t descenso a 20 m
+   1e-07           0.648         2             1.866          4629.6 días
+   1e-06           6.480         2            18.662           463.0 días
+   1e-05          64.800         2           186.624            46.3 días
+
+Con drenes de 25 m: 1 drenes por tramo de 5 m, Q total 15.552 m³/día

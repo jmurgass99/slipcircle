@@ -1,0 +1,5 @@
+método / f(x)                      FS    λ o θ  convergió
+M-P, medio seno                1.2400   0.9021  True
+M-P, constante                 1.2454   0.4143  True
+M-P, trapezoidal               1.2403   0.6981  True
+Spencer                        1.2454   22.505  True
