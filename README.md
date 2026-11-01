@@ -1,5 +1,7 @@
 # slipcircle — estabilidad de taludes por equilibrio límite (Fellenius, Bishop, Janbu, Spencer, Morgenstern-Price)
 
+**Español** · [English](README.en.md) · [Português](README.pt.md) · [Italiano](README.it.md)
+
 Factor de seguridad de taludes por el método de las dovelas sobre superficies circulares y polilíneas, búsqueda del círculo crítico, presión de poros (freático, línea piezométrica, r_u), análisis pseudo-estático con los coeficientes de EN 1998-5, desplazamiento permanente por bloque deslizante de Newmark y por Bray-Travasarou (2007), refuerzo con geosintéticos y bulones, drenes horizontales y factores de seguridad mínimos por norma. Depende de `numpy` y `scipy`; los métodos están anclados a formas cerradas y a ejemplos resueltos del máster.
 
 [![CI](https://github.com/jmurgass99/slipcircle/actions/workflows/ci.yml/badge.svg)](https://github.com/jmurgass99/slipcircle/actions/workflows/ci.yml)
