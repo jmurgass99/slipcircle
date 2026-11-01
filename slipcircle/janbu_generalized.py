@@ -108,22 +108,21 @@ class JanbuGeneralizedAnalysis:
     # ------------------------------------------------------------------
     def _reinforcement_H(self) -> float:
         """Horizontal resisting force contributed by reinforcements (kN/m)."""
-        if not self.reinforcements or not isinstance(self.surface, CircularSurface):
-            # Reinforcement intersection helpers are only available for
-            # circular surfaces, mirroring Morgenstern-Price's behaviour.
+        if not self.reinforcements or self.surface is None:
             return 0.0
         H = 0.0
         surface = self.surface
+        is_circ = isinstance(surface, CircularSurface)
         for r in self.reinforcements:
             if isinstance(r, GeosyntheticLayer):
-                xi = r.intersect_circle(surface)
+                xi = r.intersect_circle(surface) if is_circ else r.intersect_polyline(surface)
                 if xi is None:
                     continue
                 sigma_n = max(0.0, (self.slope.ground_y(xi) - r.y) * 18.0)
                 T = r.design_force(xi, sigma_n)
                 H += T
             elif isinstance(r, SoilNail):
-                hit = r.intersect_circle(surface)
+                hit = r.intersect_circle(surface) if is_circ else r.intersect_polyline(surface)
                 if hit is None:
                     continue
                 _, _, L_b = hit
@@ -234,19 +233,18 @@ class JanbuGeneralizedAnalysis:
             #   E_R acts at height h_t[i+1] on the right boundary
             #   X_L, X_R act vertically at b/2 horizontal distance
             #   W at centroid (≈ b/2 lever from base mid-point vertically)
-            # Solve for h_t[i+1] from ΣM_base_mid = 0 (small slice ⇒ ignore
-            # second-order terms in the base inclination).
+            # Solve for h_t[i+1] from ΣM_base_mid = 0 with smooth Tikhonov-style
+            # regularization near E -> 0 (toe / crest) toward Janbu (1973) §3.4 h/3.
+            E_reg = max(0.05 * W, 1.0)
             if abs(E[i + 1]) > 1e-6:
                 M_lhs = (E[i] * h_t[i]
                          + (X_left[i] + X_right[i]) * b / 2.0
                          - E[i] * b / 2.0 * tan_a
                          - E[i + 1] * b / 2.0 * tan_a)
-                h_t[i + 1] = M_lhs / E[i + 1]
+                ht_raw = M_lhs / E[i + 1]
+                w_e = (E[i + 1] ** 2) / (E[i + 1] ** 2 + E_reg ** 2)
+                h_t[i + 1] = w_e * ht_raw + (1.0 - w_e) * (h_slice / 3.0)
             else:
-                # Fallback: Janbu's classical 1/3 height assumption.
-                # FIXME: When E -> 0 (typically near the toe / crest) the
-                # thrust location is indeterminate; the 1/3 rule is used as
-                # in Janbu (1973) §3.4.
                 h_t[i + 1] = h_slice / 3.0
 
             # Clamp the thrust line inside the slice for numerical safety.
@@ -262,7 +260,7 @@ class JanbuGeneralizedAnalysis:
             dx = 0.5 * (b_left + b_right)
             d_ht = h_t[i + 1] - h_t[i - 1]
             if dx > 1e-9:
-                tan_at = d_ht / (2.0 * dx)
+                tan_at = float(np.clip(d_ht / (2.0 * dx), -1.5, 1.5))
             else:
                 tan_at = 0.0
             new_X[i] = E[i] * tan_at

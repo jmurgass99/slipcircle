@@ -75,6 +75,20 @@ class GeosyntheticLayer:
                 return float(x)
         return None
 
+    def intersect_polyline(self, polyline) -> float | None:
+        """Return x of intersection with a non-circular polyline slip surface."""
+        pts = np.asarray(polyline, dtype=float)
+        for i in range(len(pts) - 1):
+            x1, y1 = float(pts[i, 0]), float(pts[i, 1])
+            x2, y2 = float(pts[i + 1, 0]), float(pts[i + 1, 1])
+            if (y1 - self.y) * (y2 - self.y) <= 0.0 and abs(y2 - y1) > 1e-12:
+                t = (self.y - y1) / (y2 - y1)
+                if -1e-6 <= t <= 1.0 + 1e-6:
+                    xi = x1 + t * (x2 - x1)
+                    if self.x_left - 1e-6 <= xi <= self.x_right + 1e-6:
+                        return float(xi)
+        return None
+
 
 @dataclass
 class SoilNail:
@@ -132,6 +146,27 @@ class SoilNail:
                 return (float(xi), float(yi), float(L_beyond))
         return None
 
+    def intersect_polyline(self, polyline) -> tuple[float, float, float] | None:
+        """Return (x_int, y_int, L_anchored) for intersection with a polyline slip surface."""
+        pts = np.asarray(polyline, dtype=float)
+        a = np.radians(self.inclination_deg)
+        dx, dy = cos(a), -sin(a)
+        for i in range(len(pts) - 1):
+            x1, y1 = float(pts[i, 0]), float(pts[i, 1])
+            x2, y2 = float(pts[i + 1, 0]), float(pts[i + 1, 1])
+            sx, sy = x2 - x1, y2 - y1
+            denom = dx * sy - dy * sx
+            if abs(denom) < 1e-12:
+                continue
+            rx, ry = x1 - self.x_head, y1 - self.y_head
+            t = (rx * sy - ry * sx) / denom
+            u = (rx * dy - ry * dx) / denom
+            if 0.0 <= t <= self.length and -1e-6 <= u <= 1.0 + 1e-6:
+                xi = self.x_head + t * dx
+                yi = self.y_head + t * dy
+                return (float(xi), float(yi), float(self.length - t))
+        return None
+
     def design_force(self, L_beyond: float) -> float:
         T_po = pi * self.diameter * self.bond_stress * L_beyond
         return float(min(self.T_allow, T_po))
@@ -168,5 +203,35 @@ def reinforcement_moment(reinforcements: Iterable, surface: CircularSurface,
             # Lever arm = perpendicular distance from (cx, cy) to bar line
             # bar direction (dx, dy) = (cos a, -sin a); normal is (sin a, cos a)
             d = abs((xi - surface.cx) * sin(a) + (yi - surface.cy) * cos(a))
+            M += T * d
+    return M
+
+
+def reinforcement_moment_polyline(
+    reinforcements: Iterable,
+    polyline,
+    slope: Slope,
+    x_ref: float,
+    y_ref: float,
+) -> float:
+    """Resisting moment [kN·m/m] contributed by reinforcements crossing a polyline surface."""
+    M = 0.0
+    for r in reinforcements:
+        if isinstance(r, GeosyntheticLayer):
+            xi = r.intersect_polyline(polyline)
+            if xi is None:
+                continue
+            sigma_n = max(0.0, (slope.ground_y(xi) - r.y) * 18.0)
+            T = r.design_force(xi, sigma_n)
+            arm = max(abs(y_ref - r.y), 1.0)
+            M += T * arm
+        elif isinstance(r, SoilNail):
+            hit = r.intersect_polyline(polyline)
+            if hit is None:
+                continue
+            xi, yi, L_b = hit
+            T = r.design_force(L_b)
+            a = np.radians(r.inclination_deg)
+            d = max(abs((xi - x_ref) * sin(a) + (yi - y_ref) * cos(a)), 1.0)
             M += T * d
     return M

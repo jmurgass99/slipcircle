@@ -23,14 +23,19 @@ Embankments Assuming Parallel Inter-Slice Forces. Géotechnique 17(1), 11-26.
 from __future__ import annotations
 import numpy as np
 from dataclasses import dataclass
-from math import sin, cos, tan, sqrt, pi
+from math import sin, cos, tan, sqrt, pi, hypot
 from typing import Optional, List, Union, Sequence
 
 from scipy.optimize import brentq
 
 from .geometry import Slope, CircularSurface
 from .slices import slices_from_circle, slices_from_polyline
-from .reinforcement import GeosyntheticLayer, SoilNail, reinforcement_moment
+from .reinforcement import (
+    GeosyntheticLayer,
+    SoilNail,
+    reinforcement_moment,
+    reinforcement_moment_polyline,
+)
 from ._parallel_solver import solve_parallel
 
 
@@ -195,11 +200,18 @@ class SpencerAnalysis:
         # Reinforcement: additive resisting-moment convention (matches Bishop)
         # ------------------------------------------------------------------
         M_reinf = 0.0
-        if self.reinforcements and isinstance(surface, CircularSurface):
-            M_reinf = float(reinforcement_moment(
-                self.reinforcements, surface, self.slope))
-            M_d = sum(sl["weight_kN"] * sin(sl["alpha_rad"])
-                      for sl in slices) * surface.R
+        if self.reinforcements:
+            if isinstance(surface, CircularSurface):
+                M_reinf = float(reinforcement_moment(
+                    self.reinforcements, surface, self.slope))
+                M_d = sum(sl["weight_kN"] * sin(sl["alpha_rad"])
+                          for sl in slices) * surface.R
+            else:
+                M_reinf = float(reinforcement_moment_polyline(
+                    self.reinforcements, surface, self.slope, cx, cy))
+                r_eff = max(float(np.mean([hypot(sl["x_mid"] - cx, sl["y_bot"] - cy) for sl in slices])), 1.0)
+                M_d = sum(sl["weight_kN"] * max(sin(sl["alpha_rad"]), 0.05)
+                          for sl in slices) * r_eff
             if abs(M_d) > 1e-9:
                 FS = FS + M_reinf / M_d
 

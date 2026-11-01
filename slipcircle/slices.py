@@ -74,7 +74,7 @@ def slices_from_circle(slope: Slope, surface: CircularSurface,
         # Base inclination: sin(alpha) = (xm - cx) / R
         alpha = atan2(xm - cx, cy - y_bot)
 
-        soil = slope.layer_at_depth(y_bot)
+        soil = slope.layer_at_depth(y_bot, x=xm)
         gamma = soil.unit_weight
         W = gamma * h * dx + slope.surcharge * dx
 
@@ -141,7 +141,7 @@ def slices_from_polyline(slope: Slope,
         yR = float(np.interp(xR, xs, ys))
         alpha = atan2(yR - yL, dx)  # rises to the right => positive
 
-        soil = slope.layer_at_depth(y_bot)
+        soil = slope.layer_at_depth(y_bot, x=xm)
         gamma = soil.unit_weight
         W = gamma * h * dx + slope.surcharge * dx
         if water_model is not None:

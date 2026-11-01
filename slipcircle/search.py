@@ -6,6 +6,10 @@ import numpy as np
 from dataclasses import dataclass
 from .geometry import Slope, CircularSurface
 from .bishop import BishopAnalysis
+from .janbu import JanbuAnalysis
+from .janbu_generalized import JanbuGeneralizedAnalysis
+from .spencer import SpencerAnalysis
+from .morgenstern_price import MorgensternPriceAnalysis
 
 
 @dataclass
@@ -57,7 +61,27 @@ class CriticalSurfaceSearch:
         cy_range = np.linspace(crest_y + 0.2 * H, crest_y + 2.0 * max(H, 1.0), self.n_cy)
         R_range  = np.linspace(max(H * 0.6, 1.0), H * 2.5, self.n_R)
 
-        analyzer = BishopAnalysis(self.slope, n_slices=self.n_slices)
+        method_key = self.method.strip().lower()
+        if method_key == "bishop":
+            analyzer = BishopAnalysis(self.slope, n_slices=self.n_slices)
+            method_label = "Bishop Simplified (grid search)"
+        elif method_key == "spencer":
+            analyzer = SpencerAnalysis(self.slope, n_slices=self.n_slices)
+            method_label = "Spencer (grid search)"
+        elif method_key in ("morgenstern_price", "morgenstern-price", "mp"):
+            analyzer = MorgensternPriceAnalysis(self.slope, n_slices=self.n_slices)
+            method_label = "Morgenstern-Price (grid search)"
+        elif method_key == "janbu":
+            analyzer = JanbuAnalysis(self.slope, n_slices=self.n_slices)
+            method_label = "Janbu Simplified (grid search)"
+        elif method_key in ("janbu_generalized", "janbu-generalized"):
+            analyzer = JanbuGeneralizedAnalysis(self.slope, n_slices=self.n_slices)
+            method_label = "Janbu Generalized (grid search)"
+        else:
+            raise ValueError(
+                f"Unsupported search method {self.method!r}. "
+                "Use 'bishop', 'spencer', 'morgenstern_price', 'janbu' or 'janbu_generalized'."
+            )
 
         best_FS  = float("inf")
         best_surf = None
@@ -113,7 +137,7 @@ class CriticalSurfaceSearch:
             }
 
         return {
-            "method": "Bishop Simplified (grid search)",
+            "method": method_label,
             "critical_FS": round(best_FS, 4),
             "critical_surface": {
                 "cx": round(best_surf.cx, 3),
@@ -125,3 +149,73 @@ class CriticalSurfaceSearch:
             "all_results": sorted(results, key=lambda r: r["FS"])[:20],  # top 20
             "acceptable_EC7": best_FS >= 1.5,
         }
+
+    def optimize_circle(self, initial_surface: CircularSurface | None = None) -> dict:
+        """Refine critical circular surface using Nelder-Mead local optimization."""
+        from scipy.optimize import minimize
+        from .slices import slices_from_circle
+
+        if initial_surface is None:
+            grid_res = self.search()
+            if grid_res.get("critical_FS") is None:
+                return grid_res
+            cs = grid_res["critical_surface"]
+            x0 = np.array([cs["cx"], cs["cy"], cs["R"]], dtype=float)
+        else:
+            x0 = np.array([initial_surface.cx, initial_surface.cy, initial_surface.R], dtype=float)
+
+        method_key = self.method.strip().lower()
+        if method_key == "bishop":
+            analyzer = BishopAnalysis(self.slope, n_slices=self.n_slices)
+        elif method_key == "spencer":
+            analyzer = SpencerAnalysis(self.slope, n_slices=self.n_slices)
+        elif method_key in ("morgenstern_price", "morgenstern-price", "mp"):
+            analyzer = MorgensternPriceAnalysis(self.slope, n_slices=self.n_slices)
+        elif method_key == "janbu":
+            analyzer = JanbuAnalysis(self.slope, n_slices=self.n_slices)
+        else:
+            analyzer = JanbuGeneralizedAnalysis(self.slope, n_slices=self.n_slices)
+
+        toe_x, toe_y = self.slope.toe
+        H = self.slope.height
+
+        def _obj(vec: np.ndarray) -> float:
+            cx, cy, R = float(vec[0]), float(vec[1]), float(vec[2])
+            if R <= 0.5 * H or cy <= self.slope.ground_y(cx) + 0.1:
+                return 1e6
+            if (cy - R) < toe_y - self.max_depth_below_toe * H:
+                return 1e6
+            surf = CircularSurface(cx, cy, R)
+            sl = slices_from_circle(self.slope, surf, self.n_slices)
+            if len(sl) < 0.5 * self.n_slices:
+                return 1e6
+            res = analyzer.factor_of_safety(surf)
+            fs = res.get("FS")
+            if fs is None or not np.isfinite(fs) or fs <= 0.3:
+                return 1e6
+            return float(fs)
+
+        opt = minimize(_obj, x0, method="Nelder-Mead", options={"maxiter": 60, "xatol": 1e-2, "fatol": 1e-4})
+        best_cx, best_cy, best_R = float(opt.x[0]), float(opt.x[1]), float(opt.x[2])
+        best_fs = float(opt.fun)
+        return {
+            "method": f"{self.method} (Nelder-Mead)",
+            "critical_FS": round(best_fs, 4),
+            "critical_surface": {
+                "cx": round(best_cx, 3),
+                "cy": round(best_cy, 3),
+                "R": round(best_R, 3),
+            },
+            "acceptable_EC7": best_fs >= 1.5,
+        }
+
+
+def grid_search(slope: Slope, method: str = "bishop", **kwargs) -> dict:
+    """Convenience wrapper for :class:`CriticalSurfaceSearch`."""
+    return CriticalSurfaceSearch(slope=slope, method=method, **kwargs).search()
+
+
+def optimize_circle(slope: Slope, method: str = "bishop", **kwargs) -> dict:
+    """Convenience wrapper for local Nelder-Mead circle optimization."""
+    initial_surface = kwargs.pop("initial_surface", None)
+    return CriticalSurfaceSearch(slope=slope, method=method, **kwargs).optimize_circle(initial_surface=initial_surface)

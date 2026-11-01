@@ -42,6 +42,9 @@ Issues = "https://github.com/jmurgass99/slipcircle/issues"
 include = ["slipcircle*"]
 exclude = ["tests*", "examples*", "docs*"]
 
+[tool.setuptools.package-data]
+slipcircle = ["py.typed"]
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 python_files = ["test_*.py"]

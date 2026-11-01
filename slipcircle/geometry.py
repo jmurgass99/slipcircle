@@ -86,9 +86,27 @@ class Slope:
         ys = self._profile_arr[:, 1]
         return float(np.interp(x, xs, ys))
 
-    def layer_at_depth(self, y: float) -> SoilLayer:
-        """Return the soil layer at elevation y [m]."""
-        # Depth from surface at y=0 (simplified: use layer_depths directly)
+    def layer_at_depth(self, y: float, x: float | None = None) -> SoilLayer:
+        """Return the soil layer at elevation y [m] (and optional horizontal coordinate x [m]).
+
+        When ``x`` is provided, depth is measured vertically from the local ground
+        surface ``ground_y(x) - y``. When ``x`` is None on a multi-layer slope with
+        positive crest elevation, depth is measured from ``crest[1] - y``.
+        """
+        if len(self.layers) == 1:
+            return self.layers[0]
+        if x is not None:
+            depth = max(0.0, self.ground_y(x) - y)
+            for i, layer in enumerate(self.layers):
+                if depth <= self.layer_depths[i]:
+                    return layer
+            return self.layers[-1]
+        if self.crest[1] > 0.0 and y > 0.0:
+            depth = max(0.0, self.crest[1] - y)
+            for i, layer in enumerate(self.layers):
+                if depth <= self.layer_depths[i]:
+                    return layer
+            return self.layers[-1]
         for i, layer in enumerate(self.layers):
             if y >= -self.layer_depths[i]:
                 return layer
@@ -155,7 +173,7 @@ class Slope:
             alpha_rad = atan2(xm - cx, cy - y_bot)  # sin(alpha) = (xm-cx)/R
 
             # Unit weight of soil in this slice
-            soil = self.layer_at_depth(y_bot)
+            soil = self.layer_at_depth(y_bot, x=xm)
             gamma = soil.unit_weight
 
             # Weight
