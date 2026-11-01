@@ -1,6 +1,5 @@
 r"""Fase J noche 2 (2026-09-16): comparacion contra patch paralelo independiente
-(Antigravity, commit 2f11e4d en cert/antigravity-phase-j, NO fusionado, solo
-comparado) encontro una inconsistencia real en `api_mononobe`.
+(Auditoria paralela de contratos HTTP) encontro una inconsistencia real en `api_mononobe`.
 
 Todo el resto de endpoints de este router que fallan por payload incompleto
 devuelven 422 via `_wrap()` (que ya mapea KeyError/TypeError/ValueError desde

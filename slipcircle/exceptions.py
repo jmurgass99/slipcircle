@@ -1,6 +1,6 @@
 """Jerarquia de excepciones tipadas de SlipCircle.
 
-Permite al caller (REST API, GUI, AI Copilot, scripts) diferenciar la
+Permite al caller (REST API, GUI, scripts) diferenciar la
 naturaleza del fallo y reaccionar apropiadamente.
 
 Todas las clases heredan tambien de ``ValueError`` para conservar la
