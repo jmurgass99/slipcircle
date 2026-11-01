@@ -1,0 +1,99 @@
+:root {
+  --bg-main: #0b0f19;
+  --bg-panel: rgba(17, 24, 39, 0.9);
+  --border: rgba(148, 163, 184, 0.2);
+  --text-primary: #f8fafc;
+  --text-secondary: #94a3b8;
+  --accent: #10b981;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: "Inter", system-ui, sans-serif;
+  background: var(--bg-main);
+  color: var(--text-primary);
+  height: 100vh;
+  overflow: hidden;
+}
+
+.sc-layout {
+  display: grid;
+  grid-template-columns: 315px 1fr 365px;
+  height: 100vh;
+  width: 100vw;
+}
+
+.sc-panel {
+  background: var(--bg-panel);
+  border-right: 1px solid var(--border);
+  padding: 16px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.sc-panel.right {
+  border-right: none;
+  border-left: 1px solid var(--border);
+}
+
+.sc-viewer {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle at 50% 40%, #132524 0%, #090d16 100%);
+}
+
+.sc-card {
+  background: rgba(30, 41, 59, 0.55);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.sc-card h3 {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--accent);
+}
+
+.sc-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.82rem;
+  gap: 8px;
+}
+
+.sc-row label {
+  color: var(--text-secondary);
+}
+
+.sc-row input,
+.sc-row select {
+  background: #0f172a;
+  color: var(--text-primary);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 4px 8px;
+  width: 115px;
+  font-size: 0.82rem;
+}
+
+canvas.sc-chart {
+  width: 100%;
+  height: 165px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: #090d16;
+}
