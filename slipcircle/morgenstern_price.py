@@ -31,6 +31,13 @@ from scipy.optimize import brentq
 from .geometry import Slope, CircularSurface
 from .slices import slices_from_circle, slices_from_polyline
 from .reinforcement import GeosyntheticLayer, SoilNail, reinforcement_moment
+from ._parallel_solver import solve_parallel
+
+
+def _moment(fx: float, fy: float, x: float, y: float, x_ref: float, y_ref: float) -> float:
+    """Momento (antihorario positivo) de la fuerza (fx, fy) aplicada en (x, y) respecto a (x_ref, y_ref)."""
+    return (x - x_ref) * fy - (y - y_ref) * fx
+
 
 
 def half_sine(x_norm: float) -> float:
@@ -80,35 +87,42 @@ class MorgensternPriceAnalysis:
         u = sl["u_kPa"]
         Wv = W * (1.0 - kv)
         Wh = kh * W
-        N_eff = Wv - u * b
-        num = (c * b + N_eff * tan(phi)) / fs - Wv * sin(alpha) - Wh * cos(alpha)
+        # Misma Q_i de Spencer (1967) Ec. 7 con θ_i variable: base l = b·sec α
+        # y normal W·cos α (corregido 2026-10-31; antes c·b y W − u·b).
+        l = b / max(cos(alpha), 1e-9)
+        num = ((c * l + (Wv * cos(alpha) - Wh * sin(alpha) - u * l) * tan(phi)) / fs
+               - Wv * sin(alpha) - Wh * cos(alpha))
         denom = cos(alpha - theta) * (1.0 + tan(alpha - theta) * tan(phi) / fs)
         if abs(denom) < 1e-9:
             denom = 1e-9 if denom >= 0 else -1e-9
         Q = num / denom
 
         rhs_v = Wv + Q * sin(theta)
-        rhs_h = Wh - Q * cos(theta)
+        # Equilibrio horizontal con la acción sísmica W_h hacia el pie (−x):
+        # −N·sin α + S·cos α = W_h + Q·cos θ. Hasta 2026-10-31 W_h entraba con el
+        # signo opuesto en N y S (estabilizante) pero como motriz en Q, y con
+        # k_h ≠ 0 el método no convergía (FS_f = 0,90, FS_m = 0,69 en el talud de
+        # Duncan y Wright con k_h = 0,10; Bishop pseudo-estático: 0,956).
+        rhs_h = -Wh - Q * cos(theta)
         N = rhs_v * cos(alpha) + rhs_h * sin(alpha)
         S = rhs_v * sin(alpha) - rhs_h * cos(alpha)
         return Q, N, S
 
     # ------------------------------------------------------------------
-    def _equilibria_circular(self, slices, fs, lam, fvals, cx, cy, kh, kv):
-        thetas = np.arctan(lam * fvals)
-        sumF = 0.0
-        sumM = 0.0
-        for sl, th, fv in zip(slices, thetas, fvals):
-            Q, _, _ = self._slice_Q_NS(sl, fs, float(th), kh, kv)
-            sumF += Q * cos(float(th))
-            xm = sl["x_mid"]
-            y = 0.5 * (sl["y_top"] + sl["y_bot"])
-            sumM += Q * ((xm - cx) * (-sin(float(th)))
-                         + (y - cy) * cos(float(th)))
-        return sumF, sumM
+    def _global_residuals(self, slices, fs, thetas, x_ref, y_ref, kh, kv):
+        """Residuos de fuerza y de momento del equilibrio GLOBAL de la masa deslizante.
 
-    def _equilibria_polyline(self, slices, fs, lam, fvals, x_ref, y_ref, kh, kv):
-        thetas = np.arctan(lam * fvals)
+        Momento respecto a (x_ref, y_ref) de las fuerzas EXTERIORES: peso (0, −W_v) y
+        acción sísmica (−W_h, 0) en el centroide de la dovela, y reacciones de la base
+        N·(−sin α, cos α) y S·(cos α, sin α) en su punto medio. Las fuerzas entre
+        dovelas son interiores y se cancelan en el momento global. Hasta 2026-10-31
+        la rama de polilínea sumaba además el momento de Q_i y mezclaba convenios de
+        signo entre W y N/S, de modo que una polilínea muestreada de un círculo no
+        reproducía el FS del círculo. Con la referencia en el centro de un círculo, N
+        pasa por él y la expresión se reduce a R·Σ[S_i − W_i·sin α_i] =
+        R·Σ Q_i·cos(α_i − θ_i): la ecuación de Spencer (1967), que la rama circular
+        usaba ya. Con acción sísmica el momento de W_h también entra, en las dos ramas.
+        """
         sumF = 0.0
         sumM = 0.0
         for sl, th in zip(slices, thetas):
@@ -120,25 +134,19 @@ class MorgensternPriceAnalysis:
             W = sl["weight_kN"]
             Wv = W * (1.0 - kv)
             Wh = kh * W
-
             Q, N, S = self._slice_Q_NS(sl, fs, th, kh, kv)
-            # Horizontal force balance (sum of horizontal projections of Q)
             sumF += Q * cos(th)
-
-            # Moment about (x_ref, y_ref).
-            sumM += Wv * (xm - x_ref)
-            sumM += Wh * (y_mid - y_ref)
-
-            Nx = -N * sin(alpha); Ny =  N * cos(alpha)
-            sumM -= (Nx * (y_bot - y_ref) - Ny * (xm - x_ref))
-
-            Sx =  S * cos(alpha); Sy =  S * sin(alpha)
-            sumM -= (Sx * (y_bot - y_ref) - Sy * (xm - x_ref))
-
-            Qx = Q * cos(th); Qy = Q * sin(th)
-            sumM += (Qx * (y_mid - y_ref) - Qy * (xm - x_ref))
-
+            sumM += _moment(0.0, -Wv, xm, y_mid, x_ref, y_ref)
+            sumM += _moment(-Wh, 0.0, xm, y_mid, x_ref, y_ref)
+            sumM += _moment(-N * sin(alpha), N * cos(alpha), xm, y_bot, x_ref, y_ref)
+            sumM += _moment(S * cos(alpha), S * sin(alpha), xm, y_bot, x_ref, y_ref)
         return sumF, sumM
+
+    def _equilibria_circular(self, slices, fs, lam, fvals, cx, cy, kh, kv):
+        return self._global_residuals(slices, fs, np.arctan(lam * fvals), cx, cy, kh, kv)
+
+    def _equilibria_polyline(self, slices, fs, lam, fvals, x_ref, y_ref, kh, kv):
+        return self._global_residuals(slices, fs, np.arctan(lam * fvals), x_ref, y_ref, kh, kv)
 
     # ------------------------------------------------------------------
     def factor_of_safety(self, surface, kh: float = 0.0, kv: float = 0.0) -> dict:
@@ -184,26 +192,27 @@ class MorgensternPriceAnalysis:
             return self._equilibria_polyline(
                 slices, fs, lam, fvals, cx, cy, kh, kv)
 
-        FS = 1.5
-        lam = 0.0
-        last = (FS, lam)
-        it = 0
-        for it in range(self.max_iter):
-            try:
-                FS = brentq(lambda fs: residuals(fs, lam)[0],
-                            0.05, 10.0, xtol=self.tol)
-            except ValueError:
-                # FIXME: brentq bracket lost — damped fixed-point fallback.
-                FS = max(0.1, FS * 0.9)
-            try:
-                lam = brentq(lambda lm: residuals(FS, lm)[1],
-                             -1.5, 1.5, xtol=self.tol)
-            except ValueError:
-                lam *= 0.9
-            if abs(FS - last[0]) < self.tol and abs(lam - last[1]) < self.tol:
-                break
-            last = (FS, lam)
+        # Esquema de Spencer generalizado: FS_f(λ) y FS_m(λ) por separado y λ tal
+        # que coinciden (ver _parallel_solver), con el bracket de FS por encima
+        # de los polos FS = −tan(α_i − θ_i)·tan φ_i.
+        alphas = np.array([sl["alpha_rad"] for sl in slices])
+        tanphis = np.array([tan(sl["phi_rad"]) for sl in slices])
 
+        def fs_lower(lam_: float) -> float:
+            thetas = np.arctan(lam_ * fvals)
+            with np.errstate(all="ignore"):
+                poles = -np.tan(alphas - thetas) * tanphis
+            poles = poles[np.isfinite(poles)]
+            return float(poles.max(initial=0.0))
+
+        grid = np.arange(-0.5, 2.001, 0.1)
+        sol = solve_parallel(residuals, grid, fs_lower, fs_hi=10.0, tol=self.tol)
+        FS, lam = sol.FS, sol.p
+        it = sol.n_scanned
+        if not np.isfinite(FS):
+            return {"method": "Morgenstern-Price", "FS": None, "converged": False,
+                    "error": "sin raíz en FS para ningún λ de la malla",
+                    "n_slices": len(slices)}
         sumF, sumM = residuals(FS, lam)
 
         M_reinf = 0.0
@@ -224,6 +233,8 @@ class MorgensternPriceAnalysis:
             "iterations": it + 1,
             "residual_F": round(sumF, 4),
             "residual_M": round(sumM, 4),
+            "FS_force_eq": sol.FS_force,
+            "FS_moment_eq": sol.FS_moment,
             "M_reinforcement_kNm": round(M_reinf, 2),
-            "converged": (abs(sumF) < 1.0 and abs(sumM) < 1.0),
+            "converged": bool(sol.converged),
         }

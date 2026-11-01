@@ -1,5 +1,8 @@
-"""Endpoint Newmark sliding block (mejora SS-003 expuesta como REST)."""
-from __future__ import annotations
+"""Endpoint Newmark sliding block (mejora SS-003 expuesta como REST).
+
+Sin ``from __future__ import annotations``: con anotaciones diferidas FastAPI no resolvia
+la clase local ``NewmarkPayload`` y trataba el cuerpo como parametro de query (422).
+"""
 
 
 def register_newmark_endpoint(app):

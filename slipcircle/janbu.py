@@ -57,7 +57,11 @@ class JanbuAnalysis:
         if isinstance(surface, CircularSurface):
             slices = self.slope.discretize_circle(surface, self.n_slices)
         else:
-            raise NotImplementedError("Non-circular surfaces require point list input.")
+            # Polilínea [(x, y), ...]: misma discretización que Spencer y
+            # Morgenstern-Price. (Hasta 2026-10-31 lanzaba NotImplementedError
+            # pese a anunciar superficies no circulares.)
+            from .slices import slices_from_polyline
+            slices = slices_from_polyline(self.slope, surface, self.n_slices)
 
         if not slices:
             return {"FS": None, "error": "No valid slices"}
@@ -80,7 +84,7 @@ class JanbuAnalysis:
 
         # Reinforcement: extra horizontal resisting force (constant, FS-indep.).
         H_reinf = 0.0
-        if self.reinforcements:
+        if self.reinforcements and isinstance(surface, CircularSurface):
             for r in self.reinforcements:
                 if isinstance(r, GeosyntheticLayer):
                     xi = r.intersect_circle(surface)

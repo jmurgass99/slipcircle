@@ -8,17 +8,14 @@ are solved iteratively so that both ``Sum F = 0`` (along theta) and
 ``Sum M = 0`` (about an arbitrary reference point) are satisfied
 simultaneously.
 
-For a circular slip surface the moment equation reduces to the classical
-``M = R · Sum [Q_i cos(alpha_i - theta)] = 0`` because all base normals
-pass through the circle centre.  For a non-circular (polyline) surface this
-simplification does not apply and a rigorous moment balance of the full
-sliding mass about an arbitrary reference point is computed slice-by-slice,
-including the contribution of every base normal/shear and the line of
-action of every parallel inter-slice resultant (acting at slice mid-height
-— Spencer's original assumption).
-
-The two-equation 1D-in-FS / 1D-in-theta nested iteration is robust and is
-identical to the original implementation for circular surfaces.
+The two equations are solved as in Spencer (1967): FS_f(theta) from force
+equilibrium (Sum Q_i = 0) and FS_m(theta) from the moment of the EXTERNAL
+forces of the sliding mass (weight, seismic force at the slice centroid, base
+normal and shear at the base midpoint) about a reference point, with theta the
+inclination at which both coincide (see ``_parallel_solver``).  For a circular
+surface the reference point is the centre and the moment equation reduces to
+``R * Sum [Q_i cos(alpha_i - theta)] = 0``; for a polyline it is the chord
+midpoint.  ``converged`` reports whether FS_f == FS_m was found.
 
 Reference: Spencer, E. (1967). A Method of Analysis of the Stability of
 Embankments Assuming Parallel Inter-Slice Forces. Géotechnique 17(1), 11-26.
@@ -34,6 +31,13 @@ from scipy.optimize import brentq
 from .geometry import Slope, CircularSurface
 from .slices import slices_from_circle, slices_from_polyline
 from .reinforcement import GeosyntheticLayer, SoilNail, reinforcement_moment
+from ._parallel_solver import solve_parallel
+
+
+def _moment(fx: float, fy: float, x: float, y: float, x_ref: float, y_ref: float) -> float:
+    """Momento (antihorario positivo) de la fuerza (fx, fy) aplicada en (x, y) respecto a (x_ref, y_ref)."""
+    return (x - x_ref) * fy - (y - y_ref) * fx
+
 
 
 @dataclass
@@ -67,9 +71,13 @@ class SpencerAnalysis:
         Wv = W * (1.0 - kv)
         Wh = kh * W
 
-        # Spencer's per-slice expression for the inter-slice resultant Q_i
-        # (acting along the common direction theta).
-        num = ((c * b + (Wv - u * b) * tan(phi)) / FS
+        # Spencer (1967) Ec. 7: la resistencia de la base se moviliza sobre su
+        # longitud l = b·sec α y la normal del peso es W·cos α (menos la
+        # componente sísmica W_h·sin α). Hasta 2026-10-31 el numerador usaba
+        # c·b y (W − u·b): el de Bishop, no el de Spencer; en φ = 0 no
+        # reproducía la forma cerrada c·R·L_arco/ΣW·(x_m − c_x).
+        l = b / max(cos(alpha), 1e-9)
+        num = ((c * l + (Wv * cos(alpha) - Wh * sin(alpha) - u * l) * tan(phi)) / FS
                - Wv * sin(alpha) - Wh * cos(alpha))
         denom = cos(alpha - theta) * (1.0 + tan(alpha - theta) * tan(phi) / FS)
         if abs(denom) < 1e-9:
@@ -82,7 +90,12 @@ class SpencerAnalysis:
         #   N cos(alpha) + S sin(alpha) =  Wv  +  Q sin(theta)
         #   N sin(alpha) - S cos(alpha) =  Wh  -  Q cos(theta)
         rhs_v = Wv + Q * sin(theta)
-        rhs_h = Wh - Q * cos(theta)
+        # Equilibrio horizontal con la acción sísmica W_h hacia el pie (−x):
+        # −N·sin α + S·cos α = W_h + Q·cos θ. Hasta 2026-10-31 W_h entraba con el
+        # signo opuesto en N y S (estabilizante) pero como motriz en Q, y con
+        # k_h ≠ 0 el método no convergía (FS_f = 0,90, FS_m = 0,69 en el talud de
+        # Duncan y Wright con k_h = 0,10; Bishop pseudo-estático: 0,956).
+        rhs_h = -Wh - Q * cos(theta)
         N = rhs_v * cos(alpha) + rhs_h * sin(alpha)
         S = rhs_v * sin(alpha) - rhs_h * cos(alpha)
         return Q, N, S
@@ -90,32 +103,19 @@ class SpencerAnalysis:
     # ------------------------------------------------------------------
     # Global equilibrium residuals
     # ------------------------------------------------------------------
-    def _equilibria_circular(self, slices, FS, theta, cx, cy, kh, kv):
-        """
-        Force and moment residuals for a circular surface (reference = centre).
+    def _global_residuals(self, slices, FS, theta, x_ref, y_ref, kh, kv):
+        """Residuos de fuerza y de momento del equilibrio GLOBAL de la masa deslizante.
 
-        For a circular surface, Spencer (1967, Eq. 9) shows that the moment
-        equation about the centre reduces to
-
-            Sum Q_i · cos(alpha_i - theta) = 0
-
-        (the radius R is a common factor and cancels).  This is independent
-        of the line of thrust because all parallel inter-slice resultants
-        pair-cancel in moment about the centre.
-        """
-        sumF = 0.0
-        sumM = 0.0
-        for sl in slices:
-            Q, _, _ = self._slice_Q_NS(sl, FS, theta, kh, kv)
-            sumF += Q
-            sumM += Q * cos(sl["alpha_rad"] - theta)
-        return sumF, sumM
-
-    def _equilibria_polyline(self, slices, FS, theta, x_ref, y_ref, kh, kv):
-        """
-        Rigorous force/moment residuals about an arbitrary point (x_ref, y_ref)
-        for a non-circular surface.  All base reactions (N, S) and inter-slice
-        resultants Q_i contribute to the moment.
+        Momento respecto a (x_ref, y_ref) de las fuerzas EXTERIORES: peso (0, −W_v) y
+        acción sísmica (−W_h, 0) en el centroide de la dovela, y reacciones de la base
+        N·(−sin α, cos α) y S·(cos α, sin α) en su punto medio. Las fuerzas entre
+        dovelas son interiores y se cancelan en el momento global. Hasta 2026-10-31
+        la rama de polilínea sumaba además el momento de Q_i y mezclaba convenios de
+        signo entre W y N/S, de modo que una polilínea muestreada de un círculo no
+        reproducía el FS del círculo. Con la referencia en el centro de un círculo, N
+        pasa por él y la expresión se reduce a R·Σ[S_i − W_i·sin α_i] =
+        R·Σ Q_i·cos(α_i − θ_i): la ecuación de Spencer (1967), que la rama circular
+        usaba ya. Con acción sísmica el momento de W_h también entra, en las dos ramas.
         """
         sumF = 0.0
         sumM = 0.0
@@ -127,37 +127,19 @@ class SpencerAnalysis:
             W = sl["weight_kN"]
             Wv = W * (1.0 - kv)
             Wh = kh * W
-            b = sl["width"]
-            u = sl["u_kPa"]
-
             Q, N, S = self._slice_Q_NS(sl, FS, theta, kh, kv)
             sumF += Q
-
-            # 1) Weight at slice centroid (xm, y_mid)
-            sumM += Wv * (xm - x_ref)             # vertical down: lever = +(xm-xref)
-            sumM += Wh * (y_mid - y_ref)          # horizontal (seismic): lever = +(y-yref)
-
-            # 2) Base normal N (perpendicular to base, into mass: dir = (-sin a, cos a))
-            #    point of application: base midpoint (xm, y_bot)
-            #    M = N_x*(y_b - y_ref) - N_y*(xm - x_ref)
-            Nx = -N * sin(alpha)
-            Ny =  N * cos(alpha)
-            sumM -= (Nx * (y_bot - y_ref) - Ny * (xm - x_ref))
-
-            # 3) Base shear S (along base, opposing motion: dir = (-cos a, -sin a)
-            #    for a sliding mass moving downslope to the left in standard
-            #    Spencer convention).  Equivalent to: S resists motion.
-            Sx =  S * cos(alpha)
-            Sy =  S * sin(alpha)
-            sumM -= (Sx * (y_bot - y_ref) - Sy * (xm - x_ref))
-
-            # 4) Inter-slice resultant Q (parallel to theta) acting at mid-height
-            #    of slice at (xm, y_mid).
-            Qx = Q * cos(theta)
-            Qy = Q * sin(theta)
-            sumM += (Qx * (y_mid - y_ref) - Qy * (xm - x_ref))
-
+            sumM += _moment(0.0, -Wv, xm, y_mid, x_ref, y_ref)
+            sumM += _moment(-Wh, 0.0, xm, y_mid, x_ref, y_ref)
+            sumM += _moment(-N * sin(alpha), N * cos(alpha), xm, y_bot, x_ref, y_ref)
+            sumM += _moment(S * cos(alpha), S * sin(alpha), xm, y_bot, x_ref, y_ref)
         return sumF, sumM
+
+    def _equilibria_circular(self, slices, FS, theta, cx, cy, kh, kv):
+        return self._global_residuals(slices, FS, theta, cx, cy, kh, kv)
+
+    def _equilibria_polyline(self, slices, FS, theta, x_ref, y_ref, kh, kv):
+        return self._global_residuals(slices, FS, theta, x_ref, y_ref, kh, kv)
 
     # ------------------------------------------------------------------
     def factor_of_safety(self, surface, kh: float = 0.0, kv: float = 0.0) -> dict:
@@ -187,34 +169,26 @@ class SpencerAnalysis:
             return self._equilibria_polyline(
                 slices, FS, theta, cx, cy, kh, kv)
 
-        FS = 1.5
-        theta = 0.0
-        last = (FS, theta)
-        it = 0
-        for it in range(self.max_iter):
-            # (1) given theta, find FS that zeros the force residual
-            try:
-                FS = brentq(lambda fs: residuals(fs, theta)[0],
-                            0.05, 10.0, xtol=self.tol)
-            except ValueError:
-                # FIXME: no sign change in the FS bracket — fall back to a
-                # damped fixed-point step.  This branch is rarely needed for
-                # well-posed problems but can be brittle when the surface is
-                # nearly tangent to a weak layer.
-                FS = max(0.1, FS * 0.95)
+        # Esquema de Spencer: FS_f(θ) y FS_m(θ) por separado y θ tal que coinciden
+        # (ver _parallel_solver). El bracket inferior de FS queda por encima de
+        # los polos FS = −tan(α_i − θ)·tan φ_i de cada dovela.
+        alphas = np.array([sl["alpha_rad"] for sl in slices])
+        tanphis = np.array([tan(sl["phi_rad"]) for sl in slices])
 
-            # (2) given FS, find theta that zeros the moment residual
-            try:
-                theta = brentq(lambda th: residuals(FS, th)[1],
-                               -pi / 3, pi / 3, xtol=self.tol)
-            except ValueError:
-                theta *= 0.95
+        def fs_lower(theta: float) -> float:
+            with np.errstate(all="ignore"):
+                poles = -np.tan(alphas - theta) * tanphis
+            poles = poles[np.isfinite(poles)]
+            return float(poles.max(initial=0.0))
 
-            if (abs(FS - last[0]) < self.tol * max(abs(FS), 1.0)
-                    and abs(theta - last[1]) < self.tol):
-                break
-            last = (FS, theta)
-
+        grid = np.radians(np.arange(-10.0, 60.01, 2.5))
+        sol = solve_parallel(residuals, grid, fs_lower, fs_hi=10.0, tol=self.tol)
+        FS, theta = sol.FS, sol.p
+        it = sol.n_scanned
+        if not np.isfinite(FS):
+            return {"method": "Spencer", "FS": None, "converged": False,
+                    "error": "sin raíz en FS para ningún θ de la malla",
+                    "n_slices": len(slices)}
         sumF, sumM = residuals(FS, theta)
 
         # ------------------------------------------------------------------
@@ -237,6 +211,8 @@ class SpencerAnalysis:
             "iterations": it + 1,
             "residual_F": round(sumF, 4),
             "residual_M": round(sumM, 4),
+            "FS_force_eq": sol.FS_force,
+            "FS_moment_eq": sol.FS_moment,
             "M_reinforcement_kNm": round(M_reinf, 2),
-            "converged": (abs(sumF) < 1.0 and abs(sumM) < 1.0),
+            "converged": bool(sol.converged),
         }

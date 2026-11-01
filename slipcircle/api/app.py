@@ -202,3 +202,9 @@ app.add_middleware(
     allow_credentials=True, allow_methods=["*"], allow_headers=["*"],
 )
 app.include_router(router)
+
+# Hasta 2026-10-31 el endpoint /api/slope/newmark existia en endpoints_newmark.py
+# pero nunca se registraba en la app (404).
+from .endpoints_newmark import register_newmark_endpoint  # noqa: E402
+
+register_newmark_endpoint(app)
