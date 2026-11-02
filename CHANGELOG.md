@@ -1,5 +1,20 @@
 # Changelog
 
+## 1.3.2 — 2026-11-02
+
+- `MorgensternPriceAnalysis`: con f(x) variable el método usaba la resultante Q_i de Spencer con una inclinación θ_i
+  distinta en cada dovela, lo que solo impone ΣQ·cos θ = 0: no se cumplía el equilibrio vertical y el FS dependía del
+  punto respecto al que se toman momentos. Ahora el equilibrio de fuerzas es dovela a dovela en horizontal y en
+  vertical, con X = λ·f(x)·E en cada borde (formulación general de Fredlund y Krahn, 1977): se avanza desde E = 0 en
+  el primer borde y el residuo de fuerzas es la E que sobra en el último. f(x) se evalúa en los bordes de las dovelas.
+  El momento se toma respecto al centro del círculo o, en una polilínea, respecto al centro del círculo que pasa por
+  sus extremos y por su punto medio (con el centroide de la masa el residuo de momentos no es monótono en FS y la
+  raíz se pierde). Talud de Duncan y Wright con medio seno: círculo 1,3674 → 1,3587 y polilínea 1,3538 → 1,3585
+  (diferencia 1,0 % → 0,015 %); f trapezoidal 1,3638 → 1,3585; f constante sin cambios (≡ Spencer, 1,3587). El test
+  `xfail` pasa a ser un test normal y hay otro que comprueba el momento nulo respecto a cuatro puntos en la solución.
+  Cambian los casos de uso con M-P: polilínea estratificada 1,5842 → 1,5622 (Spencer 1,5596); talud de Duncan y Wright
+  con k_h = 0,10: 1,084 → 1,097 (Spencer 1,098); círculo crítico de Duncan y Wright: 1,3136 → 1,3202 (Spencer 1,3205).
+
 ## 1.3.1 — 2026-11-02
 
 - `slices.slices_from_circle` y `Slope.discretize_circle` recortaban el círculo al tramo de perfil definido: un círculo profundo que sale por delante del pie perdía la cuña pasiva (FS = 0,42 frente a 1,11 a mano en un talud φ = 0) y uno que sale más allá del último punto de coronación perdía la parte de detrás. Ahora el terreno se prolonga en horizontal fuera del perfil (`Slope.circle_ground_extent`) y la sobrecarga solo actúa dentro del perfil. Cambian los FS de los casos de uso cuyo círculo pasa por debajo del pie: Duncan y Wright pasa de 1,250 a 1,323 con Bishop (la referencia publicada está en 1,30–1,40).

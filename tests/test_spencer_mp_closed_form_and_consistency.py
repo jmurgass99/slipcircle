@@ -14,6 +14,9 @@ FS = 8,7 con θ = −46°) y la bandera ``converged`` era siempre False. Estos t
    y varían menos del 1 % entre 30 y 60 dovelas.
 3. M-P con f constante ≡ Spencer (misma θ para todas las dovelas, Q por el punto medio
    de la base).
+4. M-P con f de medio seno: el círculo y la misma superficie muestreada como polilínea
+   dan el mismo FS, y la solución cumple el equilibrio de momentos respecto a cualquier
+   punto (equilibrio de fuerzas horizontal y vertical dovela a dovela desde la 1.3.2).
 """
 from __future__ import annotations
 
@@ -115,16 +118,37 @@ def test_polyline_sampled_from_circle_reproduces_circular_fs():
         assert rp["FS"] == pytest.approx(rc["FS"], rel=0.01), cls.__name__
 
 
-@pytest.mark.xfail(strict=True, reason=(
-    "Limitación conocida: la formulación Q de M-P impone ΣQ·cos θ = 0 y momentos, pero no "
-    "ΣQ·sen θ = 0; con θ variable (medio seno) el FS depende del punto de referencia de "
-    "momentos (centro del círculo frente a centroide de la masa en polilínea): 1,367 frente a 1,354."))
 def test_mp_half_sine_polyline_reproduces_circular_fs():
+    """Con f de medio seno el círculo y su polilínea dan el mismo FS.
+
+    Hasta la 1.3.1 la formulación Q imponía ΣQ·cos θ = 0 y momentos, pero no ΣQ·sen θ = 0;
+    el FS dependía del punto de referencia de momentos: 1,367 (centro del círculo) frente
+    a 1,354 (centroide de la masa en la polilínea).
+    """
     slope, surf = _duncan_case()
     poly = _circle_as_polyline(slope, surf)
     rc = MorgensternPriceAnalysis(slope, n_slices=40).factor_of_safety(surf)
     rp = MorgensternPriceAnalysis(slope, n_slices=40).factor_of_safety(poly)
-    assert rp["FS"] == pytest.approx(rc["FS"], rel=0.005)
+    assert rc["converged"] and rp["converged"]
+    assert rp["FS"] == pytest.approx(rc["FS"], rel=0.001)
+    assert rp["lambda"] == pytest.approx(rc["lambda"], rel=0.01)
+
+
+def test_mp_solution_satisfies_moment_equilibrium_about_any_point():
+    """En la solución (FS, λ) la fuerza en el último borde es nula y el momento de las
+    fuerzas exteriores es nulo respecto a cualquier punto, no solo respecto al eje usado."""
+    from slipcircle.slices import slices_from_polyline
+    slope, surf = _duncan_case()
+    poly = _circle_as_polyline(slope, surf)
+    mp = MorgensternPriceAnalysis(slope, n_slices=40)
+    r = mp.factor_of_safety(poly)
+    slices = slices_from_polyline(slope, poly, 40)
+    _, f_right = mp._f_boundaries(slices)
+    W = sum(sl["weight_kN"] for sl in slices)
+    for x_ref, y_ref in ((surf.cx, surf.cy), (8.0, 5.0), (-20.0, 40.0), (30.0, -10.0)):
+        E_end, M = mp._residuals(slices, r["FS"], r["lambda"], f_right, x_ref, y_ref, 0.0, 0.0)
+        assert abs(E_end) < 1e-3 * W
+        assert abs(M) < 1e-3 * W * surf.R
 
 
 def test_seismic_spencer_converges_and_is_bracketed_by_bishop_pseudostatic():
