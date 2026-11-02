@@ -1,4 +1,4 @@
-import type { SliceGeometryMapping, SlopeSlice } from "../data-model";
+import type { SliceGeometryMapping, SlopeSlice } from "../data-model.ts";
 
 export function getSliceMesh(
   heightM: number,

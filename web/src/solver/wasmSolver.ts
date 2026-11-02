@@ -1,4 +1,4 @@
-import type { LemResult, SliceGeometryMapping } from "../data-model";
+import type { LemResult, SliceGeometryMapping } from "../data-model.ts";
 
 const LEM_WASM_BASE64 =
   "AGFzbQEAAAABCQFgBHx8fHwBfAMDAgAAByMCDGJpc2hvcE1BbHBoYQAAEHNsaWNlRHJpdmluZ1Rlcm0AAQogAg0AIAAgASACoiADo6ALEAAgACABoiAAIAKiIAOioAs=";

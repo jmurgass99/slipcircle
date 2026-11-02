@@ -7,7 +7,7 @@
     "dev": "vite --open",
     "build": "vite build",
     "preview": "vite preview --open",
-    "test": "vitest run",
+    "test": "node src/__tests__/slipcircleWeb.test.ts",
     "build:wasm": "emcc ./src/solver/cpp/lemKernel.cpp -o ./src/solver/cpp/built/lemKernel.wasm -O3 -s STANDALONE_WASM --no-entry -s EXPORTED_FUNCTIONS=_bishopMAlpha,_sliceDrivingTerm"
   },
   "dependencies": {

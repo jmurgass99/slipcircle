@@ -1,29 +1,30 @@
-import { describe, expect, it } from "vitest";
-import { getSliceMesh } from "../mesh/getMesh";
-import { initLemWasm, solveSlopeBishopWasm } from "../solver/wasmSolver";
+import assert from "node:assert/strict";
+import { getSliceMesh } from "../mesh/getMesh.ts";
+import { initLemWasm, solveSlopeBishopWasm } from "../solver/wasmSolver.ts";
 
-describe("SlipCircle Web — SliceGeometryMapping + lemKernel.wasm", () => {
-  it("maps strata and reinforcements across vertical slices", () => {
-    const m = getSliceMesh(10, 45, 4, 14, 15, 25);
-    expect(m.slices.length).toBe(25);
-    const total =
-      (m.stratumToSlices.get("upper_stratum")?.length ?? 0) +
-      (m.stratumToSlices.get("lower_stratum")?.length ?? 0);
-    expect(total).toBe(25);
-  });
+// 1. Slice geometry mapping
+const m = getSliceMesh(10, 45, 4, 14, 15, 25);
+assert.equal(m.slices.length, 25);
+const total =
+  (m.stratumToSlices.get("upper_stratum")?.length ?? 0) +
+  (m.stratumToSlices.get("lower_stratum")?.length ?? 0);
+assert.equal(total, 25);
 
-  it("solves Bishop Simplified FS via WebAssembly", async () => {
-    await initLemWasm();
-    const m = getSliceMesh(10, 45, 4, 14, 15, 20);
-    const res = solveSlopeBishopWasm({
-      mapping: m,
-      cUpperKPa: 18,
-      phiUpperDeg: 28,
-      cLowerKPa: 24,
-      phiLowerDeg: 32,
-      kh: 0.08,
-    });
-    expect(res.fsBishop).toBeGreaterThan(0.8);
-    expect(res.normalStressKPa.length).toBe(20);
-  });
+// 2. Bishop Simplified in WASM
+await initLemWasm();
+const m20 = getSliceMesh(10, 45, 4, 14, 15, 20);
+const res = solveSlopeBishopWasm({
+  mapping: m20,
+  cUpperKPa: 18,
+  phiUpperDeg: 28,
+  cLowerKPa: 24,
+  phiLowerDeg: 32,
+  kh: 0.08,
 });
+
+assert.ok(res.fsBishop > 0.8);
+assert.equal(res.normalStressKPa.length, 20);
+
+console.log(
+  `SlipCircle WASM test OK: FS_Bishop=${res.fsBishop.toFixed(3)}, n_slices=${res.normalStressKPa.length}`
+);
