@@ -6,4 +6,4 @@ método                   FS sin   FS con     ΔFS
 Bishop Simplified        1.3622   1.6365 +0.2743
 Janbu Simplified         1.0992   1.4958 +0.3966
 Spencer                  1.3587   1.6065 +0.2478
-Morgenstern-Price        1.3674   1.6152 +0.2478
+Morgenstern-Price        1.3587   1.6065 +0.2478

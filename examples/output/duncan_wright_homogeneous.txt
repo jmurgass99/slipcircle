@@ -6,8 +6,8 @@
   Bishop Simplified               FS = 1.3233
   Janbu Simplified                FS = 1.1451
   Spencer                         FS = 1.3205
-  Morgenstern-Price               FS = 1.3136
+  Morgenstern-Price               FS = 1.3202
 
 === Pseudo-static (kh = 0.10) ===
    {'method': 'Pseudo-static (Bishop modified)', 'FS': np.float64(1.0225), 'kh': 0.1, 'kv': 0.05, 'n_slices': 40, 'iterations': 8}
-   Same circle, kh = 0.10, kv = 0.05: Bishop pseudo-static 1.022 (W_h at the slice base), Spencer 1.098, M-P 1.084 (W_h at the centroid); Bishop is 6.9% below Spencer
+   Same circle, kh = 0.10, kv = 0.05: Bishop pseudo-static 1.022 (W_h at the slice base), Spencer 1.098, M-P 1.097 (W_h at the centroid); Bishop is 6.9% below Spencer

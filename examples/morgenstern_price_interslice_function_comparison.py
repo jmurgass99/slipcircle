@@ -2,9 +2,10 @@
 
 Mismo talud y círculo crítico de Duncan y Wright (c' = 10 kPa, φ' = 20°, γ = 18, H = 10 m,
 β = 30°). Morgenstern-Price resuelve FS y λ para una f(x) dada; con f constante coincide con
-Spencer (ángulo θ constante). Se comparan las tres funciones del paquete y se ve que el FS
-casi no cambia (menos del 1 %), que es lo que la literatura documenta para superficies
-circulares.
+Spencer (ángulo θ constante). Se comparan las tres funciones del paquete: el FS cambia en la
+cuarta cifra decimal y lo que cambia es λ, como documenta la literatura para superficies
+circulares. Hasta la 1.3.1 el medio seno daba 1,3674 porque no se imponía el equilibrio
+vertical de las dovelas.
 
 Ejecutar:  python examples/morgenstern_price_interslice_function_comparison.py
 """

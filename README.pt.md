@@ -69,11 +69,11 @@ H = 10 m, β = 30°, c' = 10 kPa, φ' = 20°, γ = 18 kN/m³, seco. Pesquisa com
   Bishop Simplified               FS = 1.3233
   Janbu Simplified                FS = 1.1451
   Spencer                         FS = 1.3205
-  Morgenstern-Price               FS = 1.3136
+  Morgenstern-Price               FS = 1.3202
 
 === Pseudo-static (kh = 0.10) ===
    {'method': 'Pseudo-static (Bishop modified)', 'FS': np.float64(1.0225), 'kh': 0.1, 'kv': 0.05, 'n_slices': 40, 'iterations': 8}
-   Same circle, kh = 0.10, kv = 0.05: Bishop pseudo-static 1.022 (W_h at the slice base), Spencer 1.098, M-P 1.084 (W_h at the centroid); Bishop is 6.9% below Spencer
+   Same circle, kh = 0.10, kv = 0.05: Bishop pseudo-static 1.022 (W_h at the slice base), Spencer 1.098, M-P 1.097 (W_h at the centroid); Bishop is 6.9% below Spencer
 ```
 
 </details>
@@ -127,7 +127,7 @@ Superficie polilínea: [(0.0, 0.0), (6.0, -1.0), (14.0, 0.5), (22.0, 6.5), (28.0
 Janbu generalizado:    FS = 1.3946  iteraciones = 32  convergió = True
 Janbu simplificado:    FS = 1.3253  f₀ = 1.1
 Spencer (polilínea):   FS = 1.5596  (fuerzas 1.5596, momentos 1.5596)  θ = 20.7°  convergió = True
-M-P (polilínea):       FS = 1.5842  (fuerzas 1.5842, momentos 1.5842)  λ = 0.73  convergió = True
+M-P (polilínea):       FS = 1.5622  (fuerzas 1.5622, momentos 1.5622)  λ = 0.46  convergió = True
 
 Janbu generalizado queda por debajo de Spencer y M-P (no impone la dirección de las fuerzas entre dovelas y usa la línea de empuje por defecto); Janbu simplificado con f₀ es la cota rápida.
 ```
@@ -140,9 +140,9 @@ Janbu generalizado queda por debajo de Spencer y M-P (no impone la dirección de
 
 ```text
 método / f(x)                      FS    λ o θ  convergió
-M-P, medio seno                1.3674   0.8002  True
+M-P, medio seno                1.3587   0.4399  True
 M-P, constante                 1.3587   0.3510  True
-M-P, trapezoidal               1.3638   0.6032  True
+M-P, trapezoidal               1.3585   0.3830  True
 Spencer                        1.3587   19.342  True
 ```
 
@@ -371,7 +371,7 @@ FS estático cerrado (talud indefinido) = 1.2566
   Bishop Simplified               FS_no_reinf=1.3622  FS_reinf=1.4590  dFS=+0.0968
   Janbu Simplified                FS_no_reinf=1.0992  FS_reinf=1.2227  dFS=+0.1235
   Spencer                         FS_no_reinf=1.3587  FS_reinf=1.4452  dFS=+0.0865
-  Morgenstern-Price               FS_no_reinf=1.3674  FS_reinf=1.4539  dFS=+0.0865
+  Morgenstern-Price               FS_no_reinf=1.3587  FS_reinf=1.4452  dFS=+0.0865
 ```
 
 </details>
@@ -421,7 +421,7 @@ método                   FS sin   FS con     ΔFS
 Bishop Simplified        1.3622   1.6365 +0.2743
 Janbu Simplified         1.0992   1.4958 +0.3966
 Spencer                  1.3587   1.6065 +0.2478
-Morgenstern-Price        1.3674   1.6152 +0.2478
+Morgenstern-Price        1.3587   1.6065 +0.2478
 ```
 
 </details>
@@ -517,7 +517,7 @@ FS = 1.3622; figura guardada en examples\output\duncan_wright_critical_circle.pn
 
 - Formas fechadas: círculo não drenado (φ = 0) para Bishop, Fellenius, Spencer e Morgenstern-Price; talude infinito seco e com coesão; impulso retangular de Newmark; ΔFS de um geotêxtil horizontal com φ = 0; FS estático da cunha de talude infinito.
 - Fichas do mestrado da UPC: Bishop sobre círculos (W00254), estabilidade global EC7 (W01672), ψ = atan(k_h/(1 ± k_v)) = 10,3°/12,5° (W00678, W00704), geotêxtil como momento resistente (W00222). Bray-Travasarou ancorado na equação publicada (Bray 2007, eq. 14.5) e no caso Austrian Dam (34,2 cm).
-- Consistência entre métodos: Spencer e M-P a menos de 2 % de Bishop no talude de Duncan e Wright e estáveis entre 30 e 60 fatias; M-P com f constante ≡ Spencer; uma poligonal amostrada do círculo reproduz o FS do círculo (1 %) com Spencer e com M-P de f constante (com f de meio seno difere ≈ 1 %: teste `xfail` documentado); Spencer com k_h = 0,10 acima do Bishop pseudoestático e a menos de 10 %.
+- Consistência entre métodos: Spencer e M-P a menos de 2 % de Bishop no talude de Duncan e Wright e estáveis entre 30 e 60 fatias; M-P com f constante ≡ Spencer; uma poligonal amostrada do círculo reproduz o FS do círculo (1 %) com Spencer e com M-P de qualquer f (meio seno: 1,3587 face a 1,3585), e a solução de M-P cumpre o equilíbrio de momentos em relação a qualquer ponto; Spencer com k_h = 0,10 acima do Bishop pseudoestático e a menos de 10 %.
 - Correções desta revisão (1.3.0): Spencer e M-P usavam em Q_i o numerador de Bishop (c·b, W − u·b) em vez do de Spencer (c·l, W·cos α − u·l) e alternavam raízes com um intervalo que incluía os polos de Q_i, pelo que o resultado dependia do número de fatias e `converged` era sempre False; o momento global do ramo poligonal somava forças interiores e misturava sinais; a ação sísmica entrava com sinal oposto em N/S. O Janbu simplificado aceita agora poligonais.
 
 ## Limitações

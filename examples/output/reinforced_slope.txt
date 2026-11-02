@@ -2,4 +2,4 @@
   Bishop Simplified               FS_no_reinf=1.3622  FS_reinf=1.4590  dFS=+0.0968
   Janbu Simplified                FS_no_reinf=1.0992  FS_reinf=1.2227  dFS=+0.1235
   Spencer                         FS_no_reinf=1.3587  FS_reinf=1.4452  dFS=+0.0865
-  Morgenstern-Price               FS_no_reinf=1.3674  FS_reinf=1.4539  dFS=+0.0865
+  Morgenstern-Price               FS_no_reinf=1.3587  FS_reinf=1.4452  dFS=+0.0865

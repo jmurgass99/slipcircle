@@ -1,5 +1,5 @@
 método / f(x)                      FS    λ o θ  convergió
-M-P, medio seno                1.3674   0.8002  True
+M-P, medio seno                1.3587   0.4399  True
 M-P, constante                 1.3587   0.3510  True
-M-P, trapezoidal               1.3638   0.6032  True
+M-P, trapezoidal               1.3585   0.3830  True
 Spencer                        1.3587   19.342  True
