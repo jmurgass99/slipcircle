@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.3.1 — 2026-11-02
+
+- `slices.slices_from_circle` y `Slope.discretize_circle` recortaban el círculo al tramo de perfil definido: un círculo profundo que sale por delante del pie perdía la cuña pasiva (FS = 0,42 frente a 1,11 a mano en un talud φ = 0) y uno que sale más allá del último punto de coronación perdía la parte de detrás. Ahora el terreno se prolonga en horizontal fuera del perfil (`Slope.circle_ground_extent`) y la sobrecarga solo actúa dentro del perfil. Cambian los FS de los casos de uso cuyo círculo pasa por debajo del pie: Duncan y Wright pasa de 1,250 a 1,323 con Bishop (la referencia publicada está en 1,30–1,40).
+- `Slope.layer_reference = "elevation"` (opcional): recupera estratos horizontales bajo y = 0 para un talud que corta estratos horizontales, como un terraplén sobre arcilla blanda; el valor por defecto `"surface"` mide desde la superficie local.
+- Casos de uso: el freático ya no sube por encima del pie (el paquete no aplica el peso ni los empujes del agua exterior); el ejemplo del terraplén usa `layer_reference="elevation"` y compara con N_c·c_u/(γ·H).
+- Test `xfail` estricto que documenta la diferencia círculo/polilínea de M-P con f de medio seno (≈ 1 %): la formulación Q impone el equilibrio horizontal y de momentos pero no ΣQ·sen θ = 0.
+
 ## 1.3.0 — 2026-10-31
 
 Correcciones encontradas al ejecutar los casos de uso del README.

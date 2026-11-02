@@ -47,6 +47,13 @@ class Slope:
         Elevation of the water table [m]. None = dry.
     surcharge : float
         Uniform surcharge on the slope crest [kPa].
+    layer_reference : str
+        ``"surface"`` (default): ``layer_depths`` are measured down from the local
+        ground surface, so interfaces run parallel to the profile.
+        ``"elevation"``: ``layer_depths`` are depths below the datum y = 0, so the
+        bottom of layer i is the horizontal line y = -layer_depths[i] (a negative
+        value puts it above the datum). Use it for horizontal strata under a
+        sloping surface, e.g. an embankment on soft ground: ``layer_depths=[0, 20]``.
 
     Examples
     --------
@@ -62,10 +69,13 @@ class Slope:
     layer_depths: list[float]
     water_table_y: float | None = None
     surcharge: float = 0.0
+    layer_reference: str = "surface"
 
     def __post_init__(self) -> None:
         if len(self.layers) != len(self.layer_depths):
             raise ValueError("len(layers) must equal len(layer_depths)")
+        if self.layer_reference not in ("surface", "elevation"):
+            raise ValueError("layer_reference must be 'surface' or 'elevation'")
         self._profile_arr = np.array(self.profile)
 
     @property
@@ -95,6 +105,11 @@ class Slope:
         """
         if len(self.layers) == 1:
             return self.layers[0]
+        if self.layer_reference == "elevation":
+            for i, layer in enumerate(self.layers):
+                if y >= -self.layer_depths[i]:
+                    return layer
+            return self.layers[-1]
         if x is not None:
             depth = max(0.0, self.ground_y(x) - y)
             for i, layer in enumerate(self.layers):
@@ -122,6 +137,31 @@ class Slope:
             return 0.0
         return gamma_w * max(0.0, self.water_table_y - y)
 
+    def circle_ground_extent(self, surface: CircularSurface,
+                             n_probe: int = 4001) -> tuple[float, float] | None:
+        """Horizontal range [x_lo, x_hi] where the circle runs below the ground surface.
+
+        The ground beyond the first and last profile points continues horizontally
+        (``ground_y`` clamps), so a deep circle that exits beyond the toe keeps the
+        soil wedge on that side instead of being cut at the end of the profile.
+        Returns None if the circle never goes below ground.
+        """
+        cx, cy, R = surface.cx, surface.cy, surface.R
+        xs = np.linspace(cx - R, cx + R, n_probe)
+        yb = cy - np.sqrt(np.maximum(R * R - (xs - cx) ** 2, 0.0))
+        yt = np.interp(xs, self._profile_arr[:, 0], self._profile_arr[:, 1])
+        below = np.nonzero(yt - yb > 1e-9)[0]
+        if below.size == 0:
+            return None
+        step = xs[1] - xs[0]
+        x_lo = max(cx - R, float(xs[below[0]]) - step)
+        x_hi = min(cx + R, float(xs[below[-1]]) + step)
+        return x_lo, x_hi
+
+    def surcharge_applies(self, x: float) -> bool:
+        """Surcharge acts only within the defined profile, not on its horizontal extensions."""
+        return float(self._profile_arr[0, 0]) <= x <= float(self._profile_arr[-1, 0])
+
     def discretize_circle(self, surface: CircularSurface,
                            n_slices: int = 20) -> list[dict]:
         """
@@ -137,14 +177,12 @@ class Slope:
         # Find entry and exit angles of circle with ground surface
         # Entry: left intersection (toe side)
         # Exit: right intersection (crest side)
-        # Simplified: use x range from toe to crest within circle
-        x_left  = cx - R
-        x_right = cx + R
-        x_left  = max(x_left,  self.toe[0])
-        x_right = min(x_right, self.crest[0])
-
-        if x_right <= x_left:
+        # x range where the circle is below ground (ground extended horizontally
+        # beyond the profile ends, see circle_ground_extent)
+        extent = self.circle_ground_extent(surface)
+        if extent is None:
             return []
+        x_left, x_right = extent
 
         x_mids = np.linspace(x_left, x_right, n_slices + 1)
         slices = []
@@ -177,7 +215,7 @@ class Slope:
             gamma = soil.unit_weight
 
             # Weight
-            W = gamma * h * dx + self.surcharge * dx
+            W = gamma * h * dx + (self.surcharge * dx if self.surcharge_applies(xm) else 0.0)
 
             # Pore pressure at base
             u = self.pore_pressure(xm, y_bot)

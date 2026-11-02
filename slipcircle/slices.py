@@ -48,13 +48,13 @@ def slices_from_circle(slope: Slope, surface: CircularSurface,
     not intersect the slope above ground level.
     """
     cx, cy, R = surface.cx, surface.cy, surface.R
-    xs_ground = np.asarray([p[0] for p in slope.profile])
 
-    # Find horizontal extent where circle is below ground.
-    x_lo = max(cx - R, float(xs_ground.min()))
-    x_hi = min(cx + R, float(xs_ground.max()))
-    if x_hi <= x_lo:
+    # Horizontal extent where the circle is below ground; the ground continues
+    # horizontally beyond the profile ends (Slope.circle_ground_extent).
+    extent = slope.circle_ground_extent(surface)
+    if extent is None:
         return []
+    x_lo, x_hi = extent
 
     edges = np.linspace(x_lo, x_hi, n_slices + 1)
     out: list[dict] = []
@@ -76,7 +76,7 @@ def slices_from_circle(slope: Slope, surface: CircularSurface,
 
         soil = slope.layer_at_depth(y_bot, x=xm)
         gamma = soil.unit_weight
-        W = gamma * h * dx + slope.surcharge * dx
+        W = gamma * h * dx + (slope.surcharge * dx if slope.surcharge_applies(xm) else 0.0)
 
         if water_model is not None:
             u = float(water_model.u(xm, y_bot))
@@ -143,7 +143,7 @@ def slices_from_polyline(slope: Slope,
 
         soil = slope.layer_at_depth(y_bot, x=xm)
         gamma = soil.unit_weight
-        W = gamma * h * dx + slope.surcharge * dx
+        W = gamma * h * dx + (slope.surcharge * dx if slope.surcharge_applies(xm) else 0.0)
         if water_model is not None:
             u = float(water_model.u(xm, y_bot))
         else:

@@ -378,9 +378,9 @@ class TestMorgensternPricePolyline:
         cx, cy, R = 15.0, 20.0, 22.0
         surf_circ = CircularSurface(cx, cy, R)
 
-        # Sample the circle within the slope footprint.
-        x_lo = max(cx - R, 0.0)
-        x_hi = min(cx + R, 30.0)
+        # Sample the circle where it runs below ground (the ground continues
+        # horizontally beyond the profile ends).
+        x_lo, x_hi = slope.circle_ground_extent(surf_circ)
         xs = np.linspace(x_lo, x_hi, 20)
         ys = cy - np.sqrt(np.maximum(R * R - (xs - cx) ** 2, 0.0))
         poly = list(zip(xs.tolist(), ys.tolist()))

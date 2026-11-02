@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "slipcircle"
-version = "1.3.0"
+version = "1.3.1"
 description = "Slope stability by limit equilibrium: Fellenius, Bishop, Janbu (simplified and generalized), Spencer and Morgenstern-Price on circular and polyline surfaces, critical circle search, pore pressure models, pseudo-static seismic analysis (EN 1998-5), Newmark sliding block and Bray-Travasarou displacements, geosynthetic and soil-nail reinforcement."
 readme = "README.md"
 authors = [{ name = "Jesús Murgas" }]
