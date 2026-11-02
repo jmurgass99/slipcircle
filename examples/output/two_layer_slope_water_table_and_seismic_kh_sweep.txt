@@ -1,11 +1,11 @@
-FS crítico en seco:            1.223
-FS crítico con freático a 4 m: 0.461  (Δ = -62.3 %)
+FS crítico en seco:            1.429
+FS crítico con freático en y = 0 m: 1.356  (Δ = -5.1 %)
 
 Barrido pseudo-estático sobre la superficie crítica húmeda (Bishop modificado):
     k_h      FS
-   0.00   0.461  ← inestable
-   0.05   0.383  ← inestable
-   0.10   0.314  ← inestable
-   0.15   0.252  ← inestable
-   0.20   0.196  ← inestable
-   0.25   0.139  ← inestable
+   0.00   1.356
+   0.05   1.216
+   0.10   1.099
+   0.15   0.998  ← inestable
+   0.20   0.911  ← inestable
+   0.25   0.836  ← inestable

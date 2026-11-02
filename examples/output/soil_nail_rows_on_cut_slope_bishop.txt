@@ -3,7 +3,7 @@ Bulón   cabeza (x, y)   intersección (x, y)   L tras rotura   T arrancamiento 
   ( 8.66,  5.0)   (15.08,  3.28)        3.35 m           84.2 kN       84.2 kN
   (12.99,  7.5)   (17.78,  6.22)        5.04 m          126.7 kN      126.7 kN
 
-FS sin bulones = 1.2501
-FS con 1 fila(s) = 1.3528  (ΔFS = +0.1027)
-FS con 2 fila(s) = 1.4385  (ΔFS = +0.1884)
-FS con 3 fila(s) = 1.5214  (ΔFS = +0.2713)
+FS sin bulones = 1.3622
+FS con 1 fila(s) = 1.4640  (ΔFS = +0.1018)
+FS con 2 fila(s) = 1.5492  (ΔFS = +0.1870)
+FS con 3 fila(s) = 1.6318  (ΔFS = +0.2696)

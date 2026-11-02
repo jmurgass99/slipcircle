@@ -1,6 +1,6 @@
-Arco entre x = 2.70 y 30.00 m: L_arco = 29.117 m; Σ W·(x_m − c_x) = 13898.2 kN·m/m
-Forma cerrada c·R·L_arco/Σ W·(x_m − c_x) = 1.2570
-Bishop simplificado (200 dovelas)          = 1.2570
-Fellenius (Σ c·l, l = b/cos α)             = 1.2570
+Arco entre x = 2.74 y 35.80 m: L_arco = 38.028 m; Σ W·(x_m − c_x) = 20630.6 kN·m/m
+Forma cerrada c·R·L_arco/Σ W·(x_m − c_x) = 1.1060
+Bishop simplificado (200 dovelas)          = 1.1060
+Fellenius (Σ c·l, l = b/cos α)             = 1.1060
 
 En φ' = 0 los tres coinciden: cualquier diferencia sería un error en el tratamiento de mα o de la base de la dovela.

@@ -1,5 +1,5 @@
 === FS comparison: unreinforced vs reinforced ===
-  Bishop Simplified               FS_no_reinf=1.2501  FS_reinf=1.3477  dFS=+0.0976
-  Janbu Simplified                FS_no_reinf=1.0088  FS_reinf=1.1344  dFS=+0.1256
-  Spencer                         FS_no_reinf=1.2454  FS_reinf=1.3311  dFS=+0.0857
-  Morgenstern-Price               FS_no_reinf=1.2400  FS_reinf=1.3257  dFS=+0.0857
+  Bishop Simplified               FS_no_reinf=1.3622  FS_reinf=1.4590  dFS=+0.0968
+  Janbu Simplified                FS_no_reinf=1.0992  FS_reinf=1.2227  dFS=+0.1235
+  Spencer                         FS_no_reinf=1.3587  FS_reinf=1.4452  dFS=+0.0865
+  Morgenstern-Price               FS_no_reinf=1.3674  FS_reinf=1.4539  dFS=+0.0865

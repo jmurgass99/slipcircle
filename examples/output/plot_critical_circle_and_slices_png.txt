@@ -1,2 +1,2 @@
 Ignoring fixed y limits to fulfill fixed data aspect with adjustable data limits.
-FS = 1.2501; figura guardada en examples\output\duncan_wright_critical_circle.png (30 kB)
+FS = 1.3622; figura guardada en examples\output\duncan_wright_critical_circle.png (30 kB)

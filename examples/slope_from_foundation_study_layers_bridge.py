@@ -5,6 +5,10 @@
 los espesores acumulados; para una arcilla con q_u y sin c toma c_u = q_u/2. Sobre el talud
 construido se busca el círculo crítico con Bishop.
 
+El freático se pone en la cota del pie (y = 0): el paquete no aplica el peso de una lámina de
+agua exterior, así que un freático por encima del terreno delante del pie daría presiones
+intersticiales sin su carga estabilizadora y un FS artificialmente bajo.
+
 Ejecutar:  python examples/slope_from_foundation_study_layers_bridge.py
 """
 from dataclasses import dataclass
@@ -32,11 +36,13 @@ def main() -> None:
     layers, depths = layers_from_foundation_spec(STUDY, name_prefix="EST")
     for L, d in zip(layers, depths):
         print(f"  {L.name:<6} c = {L.cohesion:5.1f} kPa  φ = {L.friction_angle:4.1f}°  γ = {L.unit_weight:4.1f}  base a {d:4.1f} m")
-    slope = slope_from_foundation_spec(STUDY, profile=[(0.0, 0.0), (12.0, 8.0), (40.0, 8.0)], water_table_y=2.0)
+    profile = [(0.0, 0.0), (12.0, 8.0), (40.0, 8.0)]
+    water_y = 0.0
+    slope = slope_from_foundation_spec(STUDY, profile=profile, water_table_y=water_y)
     res = CriticalSurfaceSearch(slope, n_cx=12, n_cy=10, n_R=10, n_slices=30, require_toe_exit=False,
                                 max_depth_below_toe=1.0).search()
     cs = res["critical_surface"]
-    print(f"\nTalud 8 m (1V:1,5H) con freático a 2 m: FS crítico = {res['critical_FS']:.3f}, "
+    print(f"\nTalud 8 m (1V:1,5H) con freático en y = {water_y:.1f} m (cota del pie): FS crítico = {res['critical_FS']:.3f}, "
           f"círculo ({cs['cx']}, {cs['cy']}) R = {cs['R']}, cota mínima {cs['cy'] - cs['R']:+.2f} m")
     try:
         layers_from_foundation_spec([StudyLayer(0.0, 19.0)])

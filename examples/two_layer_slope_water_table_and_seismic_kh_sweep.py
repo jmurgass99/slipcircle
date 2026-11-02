@@ -1,9 +1,13 @@
 """Influencia del nivel freático y del coeficiente sísmico en el factor de seguridad.
 
 Talud de 12 m, 1V:1,5H, dos estratos (relleno arenoso sobre arcilla). Se busca
-la superficie crítica en seco, se repite con el nivel freático a 4 m sobre el
-pie y después se hace un barrido pseudo-estático de k_h (EC8-5) sobre la
-superficie crítica del caso húmedo.
+la superficie crítica en seco, se repite con el nivel freático horizontal en la
+cota del pie (y = 0, el terreno queda saturado bajo esa cota) y después se hace
+un barrido pseudo-estático de k_h (EC8-5) sobre la superficie crítica del caso húmedo.
+
+El freático no sube por encima del pie: el paquete no aplica el peso ni los empujes de una lámina de
+agua exterior, y un nivel por encima del terreno delante del pie daría presiones intersticiales
+sin su carga estabilizadora (FS artificialmente bajo y no monótono con k_h).
 
 Ejecutar:  python examples/03_water_table_and_seismic_sweep.py
 """
@@ -23,6 +27,7 @@ LAYERS = [
     SoilLayer(name="arcilla", cohesion=25.0, friction_angle=18.0, unit_weight=18.0),
 ]
 DEPTHS = [6.0, 30.0]
+WATER_Y = 0.0   # cota del pie
 
 
 def critical(slope: Slope):
@@ -33,12 +38,12 @@ def critical(slope: Slope):
 
 def main() -> None:
     dry = Slope(profile=PROFILE, layers=LAYERS, layer_depths=DEPTHS)
-    wet = Slope(profile=PROFILE, layers=LAYERS, layer_depths=DEPTHS, water_table_y=4.0)
+    wet = Slope(profile=PROFILE, layers=LAYERS, layer_depths=DEPTHS, water_table_y=WATER_Y)
 
     fs_dry, surf_dry = critical(dry)
     fs_wet, surf_wet = critical(wet)
     print(f"FS crítico en seco:            {fs_dry:.3f}")
-    print(f"FS crítico con freático a 4 m: {fs_wet:.3f}  (Δ = {100 * (fs_wet / fs_dry - 1):+.1f} %)\n")
+    print(f"FS crítico con freático en y = {WATER_Y:.0f} m: {fs_wet:.3f}  (Δ = {100 * (fs_wet / fs_dry - 1):+.1f} %)\n")
 
     print("Barrido pseudo-estático sobre la superficie crítica húmeda (Bishop modificado):")
     print(f"  {'k_h':>5} {'FS':>7}")

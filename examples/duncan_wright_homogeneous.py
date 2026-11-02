@@ -59,7 +59,13 @@ def main() -> None:
 
     print("\n=== Pseudo-static (kh = 0.10) ===")
     pse = PseudoStaticAnalysis(slope=slope, kh=0.10, kv=0.05, n_slices=40)
-    print("  ", pse.factor_of_safety(surf))
+    fs_pse = pse.factor_of_safety(surf)
+    print("  ", fs_pse)
+    fs_sp = SpencerAnalysis(slope, n_slices=40).factor_of_safety(surf, kh=0.10, kv=0.05)["FS"]
+    fs_mp = MorgensternPriceAnalysis(slope, n_slices=40).factor_of_safety(surf, kh=0.10, kv=0.05)["FS"]
+    print(f"   Same circle, kh = 0.10, kv = 0.05: Bishop pseudo-static {float(fs_pse['FS']):.3f} "
+          f"(W_h at the slice base), Spencer {fs_sp:.3f}, M-P {fs_mp:.3f} (W_h at the centroid); "
+          f"Bishop is {1 - float(fs_pse['FS']) / fs_sp:.1%} below Spencer")
 
 
 if __name__ == "__main__":
