@@ -1,7 +1,0 @@
-  EST_1  c =   2.0 kPa  φ = 30.0°  γ = 19.0  base a  3.0 m
-  EST_2  c =  30.0 kPa  φ =  0.0°  γ = 17.5  base a  8.0 m
-  EST_3  c =   0.0 kPa  φ = 34.0°  γ = 20.0  base a 20.0 m
-
-Talud 8 m (1V:1,5H) con freático en y = 0.0 m (cota del pie): FS crítico = 1.075, círculo (4.727, 11.2) R = 13.244, cota mínima -2.04 m
-
-Capa de espesor 0 → GeotechError: Capa #1 con thickness <= 0 (0.0).
