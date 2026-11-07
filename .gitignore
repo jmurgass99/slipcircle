@@ -60,3 +60,7 @@ Documentos de referencia */
 *.sqlite3
 
 # herramientas locales de agentes
+
+# salida de los ejemplos
+examples/output/
+examples/out/

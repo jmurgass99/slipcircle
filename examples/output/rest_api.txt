@@ -1,1 +1,0 @@
-C:\Users\jesus\AppData\Local\Temp\jmv\slipcircle\Scripts\python.exe: can't open file 'C:\\Users\\jesus\\OneDrive\\Documentos\\Cloude enviroment\\repos_independientes\\slipcircle\\examples\\rest_api.py': [Errno 2] No such file or directory

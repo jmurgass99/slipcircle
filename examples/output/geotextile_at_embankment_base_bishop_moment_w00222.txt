@@ -1,5 +1,0 @@
-Intersección geotextil-círculo en x = 5.408 m; fuerza de diseño T = 50.0 kN/m (gobierna T_adm)
-Momento del refuerzo (reinforcement_moment) = 1100.0 kN·m/m
-FS sin refuerzo = 1.1060
-FS con geotextil = 1.1593  (M_refuerzo en el resultado: 1100.0)
-ΔFS cerrado = T·(c_y − y)/Σ W·(x_m − c_x) = 0.0533; ΔFS calculado = 0.0533
